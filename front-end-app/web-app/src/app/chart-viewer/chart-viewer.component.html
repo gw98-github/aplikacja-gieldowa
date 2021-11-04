@@ -1,3 +1,19 @@
 <div class="main-container">
   <h1>Poniżej znajduje się wykres:</h1>
+  <div class="div-chart">
+    <ngx-charts-line-chart
+      [view]="viewSize"
+      [results]="single"
+      [gradient]="gradient"
+      [xAxis]="showXAxis"
+      [yAxis]="showYAxis"
+      [legend]="showLegend"
+      [showXAxisLabel]="showXAxisLabel"
+      [showYAxisLabel]="showYAxisLabel"
+      [xAxisLabel]="xAxisLabel"
+      [yAxisLabel]="yAxisLabel"
+      (select)="onSelect($event)"
+    >
+    </ngx-charts-line-chart>
+  </div>
 </div>

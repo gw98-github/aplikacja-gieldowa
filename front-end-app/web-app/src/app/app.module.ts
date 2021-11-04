@@ -8,6 +8,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ChartViewerComponent } from './chart-viewer/chart-viewer.component';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 @NgModule({
   declarations: [AppComponent, ChartViewerComponent],
@@ -18,6 +19,7 @@ import { ChartViewerComponent } from './chart-viewer/chart-viewer.component';
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
+    NgxChartsModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
