@@ -19,11 +19,10 @@ export class ChartViewerComponent implements OnInit {
   showXAxis = true;
   showYAxis = true;
   gradient = false;
-  showLegend = true;
   showXAxisLabel = true;
-  xAxisLabel = 'Time';
+  xAxisLabel = 'Data';
   showYAxisLabel = true;
-  yAxisLabel = 'Population';
+  yAxisLabel = 'Wartość';
 
   colorScheme = {
     domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA'],

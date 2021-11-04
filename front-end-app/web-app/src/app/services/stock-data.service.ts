@@ -12,7 +12,7 @@ export class StockDataService {
   getStaticData() {
     return [
       {
-        name: 'Ticker',
+        name: 'Wartość',
         series: [
           { name: '2018-11-05', value: 1.0 },
           { name: '2018-11-07', value: 1.0784432590958841 },
