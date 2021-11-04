@@ -1,3 +1,20 @@
 <div class="main-container">
-  <h1>Poniżej znajduje się wykres:</h1>
+  <div><h1>Przydładowy wykres</h1></div>
+
+  <div class="div-chart">
+    <ngx-charts-line-chart
+      [view]="viewSize"
+      [results]="multi"
+      [gradient]="gradient"
+      [xAxis]="showXAxis"
+      [yAxis]="showYAxis"
+      [showXAxisLabel]="showXAxisLabel"
+      [showYAxisLabel]="showYAxisLabel"
+      [xAxisLabel]="xAxisLabel"
+      [yAxisLabel]="yAxisLabel"
+      [autoScale]="scale"
+      (select)="onSelect($event)"
+    >
+    </ngx-charts-line-chart>
+  </div>
 </div>
