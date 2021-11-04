@@ -1,4 +1,7 @@
 from flask_restful import Api, Resource, reqparse
+from datetime import datetime, timedelta
+import random
+
 
 class DataRequestHandler(Resource):
 
@@ -26,9 +29,13 @@ class DataRequestHandler(Resource):
     # currently just returning the req straight
     ret_status = request_type
     ret_msg = request_json
-
-    message = "1;2;3;4;5;6"
+    td = timedelta(hours='100')
+    begin = datetime.now().strftime('%m-%d-%Y;%H-%M-%S')
+    density = 'hour'
+    data = [400 for x in range(100)]
+    for e, d in enumerate(data[1:]):
+        data[e+1] =  max(100, data[e] + int((random.random() * 10)**2))
     
-    final_ret = {"status": "Success", "message": message}
+    final_ret = {"status": "Success", "begin": begin, "density": density, "data":data}
 
     return final_ret
