@@ -1,0 +1,1 @@
+DATABASE_URI = 'postgres+psycopg2://postgres:sarna@localhost:5432/sarna'
