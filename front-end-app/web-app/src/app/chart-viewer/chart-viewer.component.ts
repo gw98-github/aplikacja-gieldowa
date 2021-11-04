@@ -23,6 +23,7 @@ export class ChartViewerComponent implements OnInit {
   xAxisLabel = 'Data';
   showYAxisLabel = true;
   yAxisLabel = 'Wartość';
+  scale = true;
 
   colorScheme = {
     domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA'],
