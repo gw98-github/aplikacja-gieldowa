@@ -11,7 +11,7 @@ import { StockDataService } from '../services/stock-data.service';
 export class ChartViewerComponent implements OnInit {
   historicalData: Observable<HistoricalData[]> =
     this.stockDataService.historicalData;
-  single: any[];
+  multi: any[];
 
   viewSize: [number, number] = [800, 360];
 
@@ -30,7 +30,7 @@ export class ChartViewerComponent implements OnInit {
   };
 
   constructor(private stockDataService: StockDataService) {
-    this.single = this.stockDataService.getStaticData();
+    this.multi = this.stockDataService.getStaticData();
   }
   ngOnInit(): void {}
 
