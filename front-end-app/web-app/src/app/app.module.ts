@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ChartViewerComponent } from './chart-viewer/chart-viewer.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [AppComponent, ChartViewerComponent],
@@ -20,6 +21,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     MatButtonModule,
     MatIconModule,
     NgxChartsModule,
+    HttpClientModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

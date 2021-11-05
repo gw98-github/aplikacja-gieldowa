@@ -12,6 +12,7 @@ export class ChartViewerComponent implements OnInit {
   historicalData: Observable<HistoricalData[]> =
     this.stockDataService.historicalData;
   multi: any[];
+  data: any;
 
   viewSize: [number, number] = [800, 360];
 
@@ -30,11 +31,33 @@ export class ChartViewerComponent implements OnInit {
   };
 
   constructor(private stockDataService: StockDataService) {
-    this.multi = this.stockDataService.getStaticData();
+    this.multi = [];
+    this.stockDataService.getData().subscribe((response) => {
+      //next() callback
+      this.data = response.data;
+      this.data = this.createList(this.data);
+      this.multi = [
+        {
+          name: 'Wartość',
+          series: this.data,
+        },
+      ];
+    });
   }
   ngOnInit(): void {}
 
   public onSelect(event: any): void {}
 
   public onRefresh(): void {}
+
+  createList(object: any) {
+    let data: Array<{ name: string; value: number }> = [];
+    const keys = Object.keys(object);
+    const values = Object.values(object);
+    for (let n = 0; n < keys.length; n++) {
+      data.push({ name: keys[n], value: values[n] as number });
+    }
+
+    return data;
+  }
 }

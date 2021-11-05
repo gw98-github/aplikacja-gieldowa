@@ -5,8 +5,10 @@ import sqlalchemy
 from data_request_handler import DataRequestHandler
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__, static_url_path='', static_folder='frontend/build')
+CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:sarna@localhost:5432/sarna'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

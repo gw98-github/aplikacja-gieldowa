@@ -1,14 +1,24 @@
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { HistoricalData } from '../model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StockDataService {
+  baseURL: string = 'http://localhost:5000/flask/data';
+
   public historicalData: Subject<HistoricalData[]> = new Subject();
-  constructor() {}
-  // return dummy data
+
+  constructor(private http: HttpClient) {}
+
+  getData(): Observable<any> {
+    return this.http.get(this.baseURL, {
+      headers: { header: 'Access-Control-Allow-Origin' },
+    });
+  }
+
   getStaticData() {
     return [
       {
@@ -56,7 +66,7 @@ export class StockDataService {
         ],
       },
       {
-        name: 'Wartość predicted',
+        name: 'Wartość przewidywana',
         series: [
           { name: '2019-02-27', value: 1.008164342425327 },
           { name: '2019-03-01', value: 1.0269873016817928 },
