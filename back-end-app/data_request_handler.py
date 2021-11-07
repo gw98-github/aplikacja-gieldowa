@@ -1,29 +1,32 @@
+from typing import List
 from flask_restful import Api, Resource, reqparse
 from datetime import datetime, timedelta
 import random
 
-def dane_z_nikad():
-  td = timedelta(hours=1)
-  begin = datetime.now()-timedelta(hours=100)
-  data = {}
-  value = 400
-  for e in range(100):
-      value = max(100, value + int((random.random() * 2 - 1)**7 * 100))
-      data[begin.strftime('%d-%m-%Y %H:00')] = value
-      begin += td
-  
-  final_ret = {"data":data}
+import sqlalchemy
+from app import db
+from models import Company, Action, Stock, Apisource
 
-  return final_ret
+from misc import dane_z_nikad
 
 class DataRequestHandler(Resource):
 
-  def get(self):
-    return dane_z_nikad()
+  def get(self, company=None, algorythm=None):
+    data = {}
+    data['data'] = dane_z_nikad()
+    data['company'] = str(company)
+    data['algorythm'] = str(algorythm)
+    self.fetch_company_data('CDP')
+    return data
 
+  def fetch_company_data(self, company_name):
+    print(Apisource.query.all())
+    print(Stock.query.all()[0].api_id)
+    print(Company.query.all()[0].stock_id)
+    print(Action.query.all()[0].company_id)
+        
 
   def post(self):
-    print(self)
     parser = reqparse.RequestParser()
     parser.add_argument('type', type=str)
     parser.add_argument('message', type=str)
@@ -37,15 +40,5 @@ class DataRequestHandler(Resource):
     request_json = args['message']
     # ret_status, ret_msg = ReturnData(request_type, request_json)
     # currently just returning the req straight
-    ret_status = request_type
-    ret_msg = request_json
-    td = timedelta(hours='100')
-    begin = (datetime.now()-td).strftime('%m-%d-%Y;%H-%M-%S')
-    density = 'hour'
-    data = [400 for x in range(100)]
-    for e, d in enumerate(data[1:]):
-        data[e+1] =  max(100, data[e] + int((random.random() * 10)**2))
-    
-    final_ret = {"data":data}
 
-    return final_ret
+    return dane_z_nikad()

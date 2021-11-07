@@ -1,37 +1,58 @@
-from sqlalchemy.dialects.postgresql import JSON
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql.expression import false
 from app import db
+from datetime import datetime
+class Apisource(db.Model):
+    __tablename__ = 'api_source'
+    id = db.Column(db.Integer, primary_key=True)
+    api_name = db.Column(db.String(80), unique=True, nullable=False)
+    last_checked = db.Column(db.DateTime, nullable=False)
 
-Base = declarative_base()
-
-
-class Apisource(Base):
-    __tablename__ = 'API_source'
-    id = Column(Integer, primary_key=True)
-    api_name = Column(String, unique=True, nullable=False)
-    last_checked = Column(DateTime, nullable=False)
-
-
-class Stock (Base):
-    __tablename__ = 'Stock'
-    id = Column(Integer, primary_key=True)
-    stock_name = Column(String, unique=False, nullable=False)
-    last_checked = Column(DateTime, nullable=False)
-    api_id = Column(Integer, ForeignKey('apisource.id'))
+    def __init__(self, api_name, last_checked=None) -> None:
+        super().__init__()
+        self.api_name = api_name
+        if last_checked:
+            self.last_checked = last_checked
+        else:
+            self.last_checked = datetime.now()
 
 
-class Company (Base):
-    __tablename__ = 'Company'
-    id = Column(Integer, primary_key=True)
-    company_name = Column(String, unique=False, nullable=False)
-    stock_id = Column(Integer, ForeignKey('stock.id'))
+class Stock (db.Model):
+    __tablename__ = 'stock'
+    id = db.Column(db.Integer, primary_key=True)
+    stock_name = db.Column(db.String(80), unique=False, nullable=False)
+    last_checked = db.Column(db.DateTime, nullable=False)
+    api_id = db.Column(db.Integer, db.ForeignKey('api_source.id'))
+    
+    def __init__(self, stock_name, api_id, last_checked=None) -> None:
+        super().__init__()
+        self.stock_name = stock_name
+        if last_checked:
+            self.last_checked = last_checked
+        else:
+            self.last_checked = datetime.now()
+        self.api_id = api_id
 
 
-class Action (Base):
-    __tablename__ = 'Action'
-    id = Column(Integer, primary_key=True)
-    value = Column(Float, unique=False, nullable=False)
-    timestamp = Column(DateTime, nullable=False)
-    company_id = Column(Integer, ForeignKey('company.id'))
+class Company (db.Model):
+    __tablename__ = 'company'
+    id = db.Column(db.Integer, primary_key=True)
+    company_name = db.Column(db.String(80), unique=False, nullable=False)
+    stock_id = db.Column(db.Integer, db.ForeignKey('stock.id'))
+
+    def __init__(self, company_name, stock_id) -> None:
+        super().__init__()
+        self.company_name = company_name
+        self.stock_id=stock_id
+
+
+class Action (db.Model):
+    __tablename__ = 'action'
+    id = db.Column(db.Integer, primary_key=True)
+    value = db.Column(db.Float, unique=False, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False)
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+    
+    def __init__(self, value, timestamp, company_id) -> None:
+        super().__init__()
+        self.value = value
+        self.timestamp = timestamp
+        self.company_id = company_id
