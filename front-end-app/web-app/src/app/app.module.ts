@@ -10,9 +10,24 @@ import { MatIconModule } from '@angular/material/icon';
 import { ChartViewerComponent } from './chart-viewer/chart-viewer.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { HttpClientModule } from '@angular/common/http';
+import { CompaniesListComponent } from './companies-list/companies-list.component';
+import { MatTableModule } from '@angular/material/table';
+import { Routes, RouterModule } from '@angular/router';
+import { CompanyComponent } from './company/company.component';
+import { HomeComponent } from './home/home.component';
 
+const routes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'company/:id', component: CompanyComponent },
+];
 @NgModule({
-  declarations: [AppComponent, ChartViewerComponent],
+  declarations: [
+    AppComponent,
+    ChartViewerComponent,
+    CompaniesListComponent,
+    CompanyComponent,
+    HomeComponent,
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -22,8 +37,11 @@ import { HttpClientModule } from '@angular/common/http';
     MatIconModule,
     NgxChartsModule,
     HttpClientModule,
+    MatTableModule,
+    RouterModule.forRoot(routes),
   ],
   providers: [],
   bootstrap: [AppComponent],
+  exports: [RouterModule],
 })
 export class AppModule {}
