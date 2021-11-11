@@ -3,7 +3,7 @@ from flask_restful import Api, Resource, reqparse
 from datetime import datetime, timedelta
 import random
 
-import sqlalchemy
+from sqlalchemy import func
 from app import db
 from models import Company, Action, Stock, Apisource
 
@@ -53,9 +53,18 @@ class CompanyDataRequestHandler(Resource):
   def fetch_companies_data(self):
     companies = Company.query.all()
     data = []
-    for company in companies:
+    td = timedelta(days = 7)
+    time_border = datetime.now() - td
+
+    averages = db.session.query(Action.company_id, func.avg(Action.value)).filter(Action.timestamp>time_border).group_by(Action.company_id).all()
+    counts = db.session.query(Action.company_id, func.count(Action.timestamp)).group_by(Action.company_id).all()
+    companies = {company.id:company.company_name for company in Company.query.all()}
+
+    for avr_record, count_record in zip(averages, counts):
       company:Company
-      data.append({'name':company.company_name, 'record_count':Action.query.filter(Action.company_id==company.id).count()})
+      company_name = companies[avr_record[0]]
+      
+      data.append({'name':company_name, 'record_count':count_record[1], 'week_avg':avr_record[1]})
     return data
         
 
