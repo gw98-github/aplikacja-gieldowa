@@ -7,7 +7,7 @@ import { HistoricalData } from '../model';
   providedIn: 'root',
 })
 export class StockDataService {
-  baseURL: string = 'http://localhost:5000/flask/data';
+  baseURL: string = 'http://localhost:5000/flask';
 
   public historicalData: Subject<HistoricalData[]> = new Subject();
 
@@ -15,6 +15,12 @@ export class StockDataService {
 
   getData(): Observable<any> {
     return this.http.get(this.baseURL, {
+      headers: { header: 'Access-Control-Allow-Origin' },
+    });
+  }
+
+  getCompaniesList(): Observable<any> {
+    return this.http.get(this.baseURL + '/list/companies', {
       headers: { header: 'Access-Control-Allow-Origin' },
     });
   }
