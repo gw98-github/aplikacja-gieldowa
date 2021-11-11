@@ -1,7 +1,13 @@
+import random
 from typing import List
 from app import db
 from models import Apisource, Stock, Company, Action
 from misc import dane_z_nikad
+try:
+    from tqdm import tqdm
+    TQDM=True
+except:
+    TQDM=False
 
 def clear_db(db):
     print('Removing Action, Company, Stock, Apisource tables...')
@@ -52,7 +58,16 @@ def create_actions(db, company_id, steps=1000, base_value=400, fluctuation=100):
         db.session.add(a)
     db.session.commit()
 
-def populate(db, companies:List[str]=['CDP', 'Tesla', 'Game Stop']):
+def build_company_and_actions(company_name, stock_id, steps, verbouse=True):
+    if verbouse:
+        print(f'\tCreating {company_name}...')
+    company_id = create_company(db, company_name, stock_id)
+    base = random.randint(10, 1000)
+    create_actions(db, company_id, steps=steps, base_value=base, fluctuation=base/10)
+    if verbouse:
+        print(f'\t\tInserted {steps} Action records.')
+
+def populate(db, companies:List[str]=[]):
     print('Clearing db...')
     clear_db(db)
     print('Creating apisource...')
@@ -61,11 +76,17 @@ def populate(db, companies:List[str]=['CDP', 'Tesla', 'Game Stop']):
     stock_id = create_stock(db, 'Some Stock', api_id)
     print('Creating companies:')
     steps = 1000
-    for company in companies:
-        print(f'\tCreating {company}...')
-        company_id = create_company(db, company, stock_id)
-        create_actions(db, company_id, steps=steps)
-        print(f'\t\tInserted {steps} Action records.')
+
+    if companies is None or len(companies) == 0:
+        companies = ['CDP', 'Tesla', 'Game Stop']
+        companies.extend([f'company{e+3}' for e in range(64-len(companies))])
+
+    if TQDM:
+        for company in tqdm(companies):
+            build_company_and_actions(company, stock_id, steps, verbouse=False)
+    else:
+        for company in tqdm(companies):
+            build_company_and_actions(company, stock_id, steps)
     print('Finished :)')
 
 populate(db)
