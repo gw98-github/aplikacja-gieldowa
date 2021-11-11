@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { StockDataService } from '../services/stock-data.service';
 
 @Component({
   selector: 'app-company',
@@ -9,11 +10,15 @@ import { ActivatedRoute } from '@angular/router';
 export class CompanyComponent implements OnInit {
   companyName: string = 'test';
   id: string = '';
-  private sub: any;
-  constructor(private route: ActivatedRoute) {}
+  data: any[] = [];
+
+  constructor(
+    private route: ActivatedRoute,
+    private stockDataService: StockDataService
+  ) {}
 
   ngOnInit(): void {
-    this.sub = this.route.params.subscribe((params) => {
+    this.route.params.subscribe((params) => {
       this.id = params.id;
     });
   }
