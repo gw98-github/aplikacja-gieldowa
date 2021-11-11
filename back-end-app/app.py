@@ -24,8 +24,9 @@ api = Api(app)
 def serve(path):
     return send_from_directory(app.static_folder,'index.html')
 
-from data_request_handler import DataRequestHandler
-api.add_resource(DataRequestHandler, '/flask/data/<company>')
+from data_request_handler import ActionDataRequestHandler, CompanyDataRequestHandler
+api.add_resource(ActionDataRequestHandler, '/flask/data/<company>')
+api.add_resource(CompanyDataRequestHandler, '/flask/list/companies')
 
 
 if __name__ == '__main__':

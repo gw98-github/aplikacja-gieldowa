@@ -9,14 +9,13 @@ from models import Company, Action, Stock, Apisource
 
 from misc import dane_z_nikad
 
-class DataRequestHandler(Resource):
+class ActionDataRequestHandler(Resource):
 
-  def get(self, company=None, algorythm=None):
+  def get(self, company=None):
     data = {}
     data['data'], historical_final = dane_z_nikad(steps=80, return_final=True)
     data['predict'] = dane_z_nikad(beg_val=historical_final, steps=20)
     data['company'] = str(company)
-    data['algorythm'] = str(algorythm)
     return data
 
   def fetch_company_data(self, company_name):
@@ -42,3 +41,23 @@ class DataRequestHandler(Resource):
     # currently just returning the req straight
 
     return dane_z_nikad()
+  
+
+class CompanyDataRequestHandler(Resource):
+
+  def get(self):
+    data = {}
+    data['companies'] = self.fetch_companies_data()
+    return data
+
+  def fetch_companies_data(self):
+    companies = Company.query.all()
+    data = []
+    for company in companies:
+      company:Company
+      data.append({'name':company.company_name, 'record_count':Action.query.filter(Action.company_id==company.id).count()})
+    return data
+        
+
+  def post(self):
+    return {'ERROR':'NOT IMPLEMENTED!'}
