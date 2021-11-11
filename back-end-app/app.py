@@ -6,12 +6,12 @@ import sqlalchemy
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS, cross_origin
-
+import config
 app = Flask(__name__)
 
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:sarna@localhost:5432/sarna'
+app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
 
@@ -23,7 +23,7 @@ api = Api(app)
 @app.route("/", defaults={'path':''})
 def serve(path):
     return send_from_directory(app.static_folder,'index.html')
-    
+
 from data_request_handler import DataRequestHandler
 api.add_resource(DataRequestHandler, '/flask/data/<company>/<algorythm>')
 

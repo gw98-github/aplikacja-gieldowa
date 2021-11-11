@@ -1,0 +1,13 @@
+version: '3.5'
+services:
+  database:
+    container_name: postgress
+    image: postgres
+    volumes:
+      - db-data:/var/lib/postgres/data
+    env_file: database.conf
+    ports:
+      - 5432:5432
+
+volumes:
+  db-data:
