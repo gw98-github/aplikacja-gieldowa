@@ -25,7 +25,7 @@ def serve(path):
     return send_from_directory(app.static_folder,'index.html')
 
 from data_request_handler import DataRequestHandler
-api.add_resource(DataRequestHandler, '/flask/data/<company>/<algorythm>')
+api.add_resource(DataRequestHandler, '/flask/data/<company>')
 
 
 if __name__ == '__main__':

@@ -13,10 +13,10 @@ class DataRequestHandler(Resource):
 
   def get(self, company=None, algorythm=None):
     data = {}
-    data['data'] = dane_z_nikad()
+    data['data'], historical_final = dane_z_nikad(steps=80, return_final=True)
+    data['predict'] = dane_z_nikad(beg_val=historical_final, steps=20)
     data['company'] = str(company)
     data['algorythm'] = str(algorythm)
-    self.fetch_company_data('CDP')
     return data
 
   def fetch_company_data(self, company_name):

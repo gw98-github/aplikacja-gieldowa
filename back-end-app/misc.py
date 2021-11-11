@@ -1,7 +1,8 @@
 from datetime import timedelta, datetime
 import random
 
-def dane_z_nikad(steps:int=100, end:datetime=None, step_time:timedelta=None, beg_val:int=400, stringify=True, fluctuation=100):
+def dane_z_nikad(steps:int=100, end:datetime=None, step_time:timedelta=None, beg_val:int=400, 
+    stringify=True, fluctuation=100, return_final:bool=False):
     td = timedelta(hours=1)
     if not step_time:
         step_time = timedelta(hours=1)
@@ -17,4 +18,6 @@ def dane_z_nikad(steps:int=100, end:datetime=None, step_time:timedelta=None, beg
         else:
             data[begin] = value
         begin += td
+    if return_final:
+        return data, value
     return data
