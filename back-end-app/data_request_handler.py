@@ -3,7 +3,7 @@ from flask_restful import Api, Resource, reqparse
 from datetime import datetime, timedelta
 import random
 
-from sqlalchemy import func
+from sqlalchemy import func, desc
 from app import db
 from models import Company, Action, Stock, Apisource
 
@@ -12,19 +12,20 @@ from misc import dane_z_nikad
 class ActionDataRequestHandler(Resource):
 
   def get(self, company=None):
-    tuples = dane_z_nikad(steps=100, as_tuples=True)
-    data = {}
-    data['data'] = {t[0]:t[1] for t in tuples[:-20]}
-    data['predict'] = {t[0]:t[1] for t in tuples[-21:]}
-    data['company'] = str(company)
-    return data
+    return self.fetch_company_data(company)
 
   def fetch_company_data(self, company_name):
-    print(Apisource.query.all())
-    print(Stock.query.all()[0].api_id)
-    print(Company.query.all()[0].stock_id)
-    print(Action.query.all()[0].company_id)
-        
+    data = {'company': company_name}
+
+    company = Company.query.filter(Company.company_name == company_name).all()[0]
+
+    actions = Action.query.filter(Action.company_id==company.id).order_by(desc(Action.timestamp)).limit(100)[::-1]
+    actions = [(action.timestamp.strftime('%d-%m-%Y %H:00'), action.value) for action in actions]
+
+    data['data'] = {t[0]:t[1] for t in actions[:-20]}
+    data['predict'] = {t[0]:t[1] for t in actions[-21:]}
+    
+    return data
 
   def post(self):
     parser = reqparse.RequestParser()
