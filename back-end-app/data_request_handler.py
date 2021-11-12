@@ -20,11 +20,11 @@ class ActionDataRequestHandler(Resource):
     company = Company.query.filter(Company.company_name == company_name).all()[0]
 
     actions = Action.query.filter(Action.company_id==company.id).order_by(desc(Action.timestamp)).limit(100)[::-1]
-    actions = [(action.timestamp.strftime('%d-%m-%Y %H:00'), action.value) for action in actions]
+    actions = [(action.timestamp.strftime('%Y-%m-%dT%H:00:00'), action.value) for action in actions]
 
     data['data'] = {t[0]:t[1] for t in actions[:-20]}
     data['predict'] = {t[0]:t[1] for t in actions[-21:]}
-    
+
     return data
 
   def post(self):
