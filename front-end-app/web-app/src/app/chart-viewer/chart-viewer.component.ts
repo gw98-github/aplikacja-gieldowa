@@ -16,7 +16,7 @@ export class ChartViewerComponent implements OnInit {
   companyName: string = '';
 
   multi: any[];
-  data: Array<Array<{ name: string; value: number }>> = [];
+  data: Array<Array<{ name: Date; value: number }>> = [];
 
   viewSize: [number, number] = [800, 360];
 
@@ -42,8 +42,8 @@ export class ChartViewerComponent implements OnInit {
       .getCompanyData(this.companyName)
       .subscribe((response) => {
         //next() callback
-        this.data = response;
-        this.data = this.createList(this.data);
+        this.data = this.createList(response);
+
         this.multi = [
           {
             name: 'Wartość',
@@ -62,17 +62,22 @@ export class ChartViewerComponent implements OnInit {
   public onRefresh(): void {}
 
   createList(object: any) {
-    let data: Array<{ name: string; value: number }> = [];
+    let data: Array<{ name: Date; value: number }> = [];
+    let dataPred: Array<{ name: Date; value: number }> = [];
+
     const keys = Object.keys(object.data);
     const values = Object.values(object.data);
     for (let n = 0; n < keys.length; n++) {
-      data.push({ name: keys[n], value: values[n] as number });
+      data.push({ name: new Date(keys[n]), value: values[n] as number });
     }
-    let dataPred: Array<{ name: string; value: number }> = [];
+
     const keysPred = Object.keys(object.predict);
     const valuesPred = Object.values(object.predict);
     for (let n = 0; n < keysPred.length; n++) {
-      dataPred.push({ name: keysPred[n], value: valuesPred[n] as number });
+      dataPred.push({
+        name: new Date(keysPred[n]),
+        value: valuesPred[n] as number,
+      });
     }
 
     return [data, dataPred];

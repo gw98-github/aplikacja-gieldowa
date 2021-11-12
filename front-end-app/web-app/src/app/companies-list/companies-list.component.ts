@@ -28,7 +28,6 @@ export class CompaniesListComponent implements OnInit {
     this.stockDataService.getCompaniesList().subscribe((response) => {
       this.companies = response.companies;
       this.dataSource.data = this.companies;
-      console.log(this.dataSource);
     });
   }
   ngOnInit(): void {}
