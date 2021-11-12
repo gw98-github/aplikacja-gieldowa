@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HistoricalData } from '../model';
 import { StockDataService } from '../services/stock-data.service';
@@ -11,8 +11,12 @@ import { StockDataService } from '../services/stock-data.service';
 export class ChartViewerComponent implements OnInit {
   historicalData: Observable<HistoricalData[]> =
     this.stockDataService.historicalData;
+
+  @Input()
+  companyName: string = '';
+
   multi: any[];
-  data: any;
+  data: Array<Array<{ name: string; value: number }>> = [];
 
   viewSize: [number, number] = [800, 360];
 
@@ -32,19 +36,26 @@ export class ChartViewerComponent implements OnInit {
 
   constructor(private stockDataService: StockDataService) {
     this.multi = [];
-    this.stockDataService.getData().subscribe((response) => {
-      //next() callback
-      this.data = response.data;
-      this.data = this.createList(this.data);
-      this.multi = [
-        {
-          name: 'Wartość',
-          series: this.data,
-        },
-      ];
-    });
   }
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.stockDataService
+      .getCompanyData(this.companyName)
+      .subscribe((response) => {
+        //next() callback
+        this.data = response;
+        this.data = this.createList(this.data);
+        this.multi = [
+          {
+            name: 'Wartość',
+            series: this.data[0],
+          },
+          {
+            name: 'Predykcja',
+            series: this.data[1],
+          },
+        ];
+      });
+  }
 
   public onSelect(event: any): void {}
 
@@ -52,12 +63,18 @@ export class ChartViewerComponent implements OnInit {
 
   createList(object: any) {
     let data: Array<{ name: string; value: number }> = [];
-    const keys = Object.keys(object);
-    const values = Object.values(object);
+    const keys = Object.keys(object.data);
+    const values = Object.values(object.data);
     for (let n = 0; n < keys.length; n++) {
       data.push({ name: keys[n], value: values[n] as number });
     }
+    let dataPred: Array<{ name: string; value: number }> = [];
+    const keysPred = Object.keys(object.predict);
+    const valuesPred = Object.values(object.predict);
+    for (let n = 0; n < keysPred.length; n++) {
+      dataPred.push({ name: keysPred[n], value: valuesPred[n] as number });
+    }
 
-    return data;
+    return [data, dataPred];
   }
 }

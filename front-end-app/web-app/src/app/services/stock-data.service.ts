@@ -25,6 +25,12 @@ export class StockDataService {
     });
   }
 
+  getCompanyData(name: string): Observable<any> {
+    return this.http.get(this.baseURL + '/data/' + name, {
+      headers: { header: 'Access-Control-Allow-Origin' },
+    });
+  }
+
   getStaticData() {
     return [
       {

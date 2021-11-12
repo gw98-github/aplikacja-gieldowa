@@ -5,3 +5,7 @@ table {
 .mat-column-details {
   width: 200px;
 }
+mat-paginator {
+  width: 90%;
+  margin: auto;
+}

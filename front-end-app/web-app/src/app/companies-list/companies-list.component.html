@@ -1,59 +1,65 @@
-<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-  <ng-container matColumnDef="number">
-    <th
-      mat-header-cell
-      *matHeaderCellDef
-      mat-sort-header
-      sortActionDescription="Sort by number"
-    >
-      Lp.
-    </th>
-    <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
-  </ng-container>
-  <ng-container matColumnDef="name">
-    <th
-      mat-header-cell
-      *matHeaderCellDef
-      mat-sort-header
-      sortActionDescription="Sort by name"
-    >
-      Nazwa
-    </th>
-    <td mat-cell *matCellDef="let element">{{ element.name }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="week_avg">
-    <th
-      mat-header-cell
-      *matHeaderCellDef
-      mat-sort-header
-      sortActionDescription="Sort by week_avg"
-    >
-      Średnia miesięczna
-    </th>
-    <td mat-cell *matCellDef="let element">{{ element.week_avg }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="details">
-    <th
-      mat-header-cell
-      *matHeaderCellDef
-      mat-sort-header
-      sortActionDescription="Sort by details"
-    >
-      Szczegóły
-    </th>
-    <td mat-cell *matCellDef="let element">
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="openCompanyPage(element.name)"
+<div class="mat-elevation-z8">
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <ng-container matColumnDef="number">
+      <th
+        mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header
+        sortActionDescription="Sort by number"
       >
-        Zobacz szczegóły
-      </button>
-    </td>
-  </ng-container>
+        Lp.
+      </th>
+      <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
+    </ng-container>
+    <ng-container matColumnDef="name">
+      <th
+        mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header
+        sortActionDescription="Sort by name"
+      >
+        Nazwa
+      </th>
+      <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+    </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-</table>
+    <ng-container matColumnDef="week_avg">
+      <th
+        mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header
+        sortActionDescription="Sort by week_avg"
+      >
+        Średnia miesięczna
+      </th>
+      <td mat-cell *matCellDef="let element">{{ element.week_avg }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="details">
+      <th
+        mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header
+        sortActionDescription="Sort by details"
+      >
+        Szczegóły
+      </th>
+      <td mat-cell *matCellDef="let element">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="openCompanyPage(element.name)"
+        >
+          Zobacz szczegóły
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+  <mat-paginator
+    [pageSizeOptions]="[15, 40, 100]"
+    aria-label="Select page of users"
+  ></mat-paginator>
+</div>
