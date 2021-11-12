@@ -78,7 +78,7 @@ def populate(db, companies:List[str]=[]):
     steps = 1000
 
     if companies is None or len(companies) == 0:
-        companies = ['CDP', 'Tesla', 'Game Stop']
+        companies = ['cdp', 'tesla', 'game_stop']
         companies.extend([f'company{e+3}' for e in range(64-len(companies))])
 
     if TQDM:
