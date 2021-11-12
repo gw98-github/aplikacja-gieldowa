@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { StockDataService } from '../services/stock-data.service';
-
+import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 
@@ -19,6 +19,8 @@ export class CompaniesListComponent implements OnInit {
   displayedColumns: string[] = ['number', 'name', 'week_avg', 'details'];
   dataSource = new MatTableDataSource(this.companies);
 
+  @ViewChild(MatPaginator) paginator?: MatPaginator;
+
   constructor(
     private stockDataService: StockDataService,
     private router: Router
@@ -30,6 +32,10 @@ export class CompaniesListComponent implements OnInit {
     });
   }
   ngOnInit(): void {}
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator!;
+  }
 
   openCompanyPage(companyName: any) {
     // this.router.navigate(['/' + companyName]);

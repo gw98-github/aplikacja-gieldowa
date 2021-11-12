@@ -15,6 +15,7 @@ import { MatTableModule } from '@angular/material/table';
 import { Routes, RouterModule } from '@angular/router';
 import { CompanyComponent } from './company/company.component';
 import { HomeComponent } from './home/home.component';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -38,6 +39,7 @@ const routes: Routes = [
     NgxChartsModule,
     HttpClientModule,
     MatTableModule,
+    MatPaginatorModule,
     RouterModule.forRoot(routes),
   ],
   providers: [],
