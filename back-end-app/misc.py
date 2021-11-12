@@ -2,22 +2,22 @@ from datetime import timedelta, datetime
 import random
 
 def dane_z_nikad(steps:int=100, end:datetime=None, step_time:timedelta=None, beg_val:int=400, 
-    stringify=True, fluctuation=100, return_final:bool=False):
+    stringify=True, fluctuation=100, as_tuples:bool=False):
     td = timedelta(hours=1)
     if not step_time:
         step_time = timedelta(hours=1)
     if not end:
         end = datetime.now()
     begin = end-step_time*steps
-    data = {}
+    data = []
     value = beg_val
     for e in range(steps):
         value = max(100, value + (random.random() * 2 - 1)**5 * fluctuation)
         if stringify:
-            data[begin.strftime('%d-%m-%Y %H:00')] = value
+            data.append((begin.strftime('%d-%m-%Y %H:00'), value))
         else:
-            data[begin] = value
+            data.append((begin, value))
         begin += td
-    if return_final:
-        return data, value
-    return data
+    if as_tuples:
+        return data
+    return {t[0]: t[1] for t in data}

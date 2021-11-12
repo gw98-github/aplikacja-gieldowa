@@ -12,9 +12,10 @@ from misc import dane_z_nikad
 class ActionDataRequestHandler(Resource):
 
   def get(self, company=None):
+    tuples = dane_z_nikad(steps=100, as_tuples=True)
     data = {}
-    data['data'], historical_final = dane_z_nikad(steps=80, return_final=True)
-    data['predict'] = dane_z_nikad(beg_val=historical_final, steps=20)
+    data['data'] = {t[0]:t[1] for t in tuples[:-20]}
+    data['predict'] = {t[0]:t[1] for t in tuples[-21:]}
     data['company'] = str(company)
     return data
 
