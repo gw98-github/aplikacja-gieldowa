@@ -1,3 +1,4 @@
+from datetime import timedelta
 import random
 from typing import List
 from app import db
@@ -8,6 +9,7 @@ try:
     TQDM=True
 except:
     TQDM=False
+    print("Consider instaling tqdm package for your Python interpreter:\npy -m pip install tqdm")
 
 def clear_db(db):
     print('Removing Action, Company, Stock, Apisource tables...')
@@ -53,7 +55,7 @@ def create_company(db, name:str, stock_id:int):
     return company.id
 
 def create_actions(db, company_id, steps=1000, base_value=400, fluctuation=100):
-    for timestamp, value in dane_z_nikad(steps=steps, beg_val=base_value, fluctuation=fluctuation, stringify=False).items():
+    for timestamp, value in dane_z_nikad(steps=steps, beg_val=base_value, fluctuation=fluctuation, stringify=False, step_time=timedelta(hours=1)).items():
         a = Action(value, timestamp, company_id)
         db.session.add(a)
     db.session.commit()
@@ -88,5 +90,8 @@ def populate(db, companies:List[str]=[]):
         for company in tqdm(companies):
             build_company_and_actions(company, stock_id, steps)
     print('Finished :)')
+
+
+random.seed(42)
 
 populate(db)
