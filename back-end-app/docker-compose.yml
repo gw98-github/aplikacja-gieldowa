@@ -8,6 +8,16 @@ services:
     env_file: database.conf
     ports:
       - 5432:5432
-
+  rabbitmq3:
+        container_name: "rabbitmq"
+        image: rabbitmq:3.8-management-alpine
+        environment:
+            - RABBITMQ_DEFAULT_USER=sarna
+            - RABBITMQ_DEFAULT_PASS=sarna
+        ports:
+            # AMQP protocol port
+            - '5672:5672'
+            # HTTP management UI
+            - '15672:15672'
 volumes:
   db-data:

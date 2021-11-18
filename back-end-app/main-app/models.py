@@ -36,11 +36,13 @@ class Company (db.Model):
     __tablename__ = 'company'
     id = db.Column(db.Integer, primary_key=True)
     company_name = db.Column(db.String(80), unique=False, nullable=False)
+    symbol = db.Column(db.String(80), unique=False, nullable=False)
     stock_id = db.Column(db.Integer, db.ForeignKey('stock.id'))
 
-    def __init__(self, company_name, stock_id) -> None:
+    def __init__(self, company_name, symbol, stock_id) -> None:
         super().__init__()
         self.company_name = company_name
+        self.symbol = symbol
         self.stock_id=stock_id
 
 
