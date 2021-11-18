@@ -19,5 +19,11 @@ services:
             - '5672:5672'
             # HTTP management UI
             - '15672:15672'
+  stockapiworker:
+    build: stockapiworker
+    volumes:
+      - ./stock-api-worker:/app
+    environment:
+      - PYTHONUNBUFFERED=1
 volumes:
   db-data:

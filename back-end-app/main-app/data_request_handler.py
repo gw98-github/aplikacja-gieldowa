@@ -2,12 +2,42 @@ from typing import List
 from flask_restful import Api, Resource, reqparse
 from datetime import datetime, timedelta
 import random
-
+import pika
 from sqlalchemy import func, desc
 from app import db
 from models import Company, Action, Stock, Apisource
 
 from misc import dane_z_nikad
+
+class AddCompanyRequestHandler(Resource):
+
+  def get(self, symbol=None):
+    return self.add_company(symbol)
+
+  def add_company(self, symbol):
+    
+    results = Company.query.filter(Company.symbol == symbol).all()
+    if len(results)> 0:
+      company = results[0]
+      return {'msg': 'present', 'name': company.company_name}
+    print('connecting')
+    credentials = pika.PlainCredentials('sarna', 'sarna')
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
+
+    print('channel')
+    channel = connection.channel()
+    print('queue_declare')
+    channel.queue_declare(queue='task_queue', durable=True)
+    print('basic_publish')
+    channel.basic_publish(
+        exchange='',
+        routing_key='task_queue',
+        body=symbol,
+        properties=pika.BasicProperties(
+            delivery_mode=2,  # make message persistent
+        ))
+    connection.close()
+    return {'msg': 'adding'}
 
 class ActionDataRequestHandler(Resource):
 
@@ -15,10 +45,18 @@ class ActionDataRequestHandler(Resource):
     return self.fetch_company_data(company)
 
   def fetch_company_data(self, company_name):
-    data = {'company': company_name}
+    
+    results = Company.query.filter(Company.company_name == company_name).all()
+    if len(results)> 0:
+      company = results[0]
+    else:
+      results = Company.query.filter(Company.symbol == company_name).all()
+      if len(results)> 0:
+        company = results[0]
+      else:
+        return {'company': 'NONE', 'data': 'NONE', 'predict': 'NONE'}
 
-    company = Company.query.filter(Company.company_name == company_name).all()[0]
-
+    data = {'company': company.company_name}
     actions = Action.query.filter(Action.company_id==company.id).order_by(desc(Action.timestamp)).limit(100)[::-1]
     actions = [(action.timestamp.strftime('%Y-%m-%dT%H:%M:00'), action.value) for action in actions]
 

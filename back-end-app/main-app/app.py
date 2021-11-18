@@ -7,6 +7,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS, cross_origin
 import config
+
+
+import pika
+
 app = Flask(__name__)
 
 CORS(app)
@@ -24,8 +28,9 @@ api = Api(app)
 def serve(path):
     return send_from_directory(app.static_folder,'index.html')
 
-from data_request_handler import ActionDataRequestHandler, CompanyDataRequestHandler
+from data_request_handler import ActionDataRequestHandler, AddCompanyRequestHandler, CompanyDataRequestHandler
 api.add_resource(ActionDataRequestHandler, '/flask/data/<company>')
+api.add_resource(AddCompanyRequestHandler, '/flask/add_company/<symbol>')
 api.add_resource(CompanyDataRequestHandler, '/flask/list/companies')
 
 
