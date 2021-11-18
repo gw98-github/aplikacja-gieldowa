@@ -13,7 +13,23 @@ def get_company_data(self,symbol):
         List.append((i.to_pydatetime().strftime('%Y-%m-%dT%H:%M:00'),values.at[i,"Open"]))
     return {'symbol':symbol, 'name':name, 'records':List}
 
+db_conn = psycopg2.connect(database='sarna', user='postgres', host='0.0.0.0', password='sarna')
+cur = db_conn.cursor()
 
+def write_in_database(symbol,name,List):
+    cur.execute("SELECT id FROM stock")
+    stock_id= cur.fetchone()
+    company_name=name
+    sql = """INSERT INTO company(company_name,symbol,stock_id)
+             VALUES(%s) RETURNING id;"""
+    cur.execute(sql, (company_name,symbol,stock_id))
+    company_id = cur.fetchone()[0]
+    db_conn.commit()
+    sql = "INSERT INTO actions(value, timestamp, company_id) VALUES(%s)"
+    for l in List:
+        cur.execute(sql, (l[0],l[1],company_id))
+        db_conn.commit()
+    return
 
 def callback(ch, method, properties, body):
     print(" [x] Received %s" % body)
