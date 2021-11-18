@@ -65,7 +65,7 @@ def build_company_and_actions(company_name, stock_id, steps, verbouse=True):
         print(f'\tCreating {company_name}...')
     company_id = create_company(db, company_name, stock_id)
     base = random.randint(10, 1000)
-    create_actions(db, company_id, steps=steps, base_value=base, fluctuation=base/10)
+    create_actions(db, company_id, steps=steps, base_value=base, fluctuation=base/100)
     if verbouse:
         print(f'\t\tInserted {steps} Action records.')
 
