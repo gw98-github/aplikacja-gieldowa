@@ -9,6 +9,32 @@ from models import Company, Action, Stock, Apisource
 
 from misc import dane_z_nikad
 
+class PredictRequestHandler(Resource):
+
+  def get(self, symbol=None):
+    return self.add_company(symbol)
+
+  def add_company(self, symbol):
+    
+    results = Company.query.filter(Company.symbol == symbol).all()
+    if len(results)> 0:
+      company = results[0]
+      return {'msg': 'present', 'name': company.company_name}
+    credentials = pika.PlainCredentials('sarna', 'sarna')
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
+    channel = connection.channel()
+    channel.queue_declare(queue='task_queue', durable=True)
+    channel.basic_publish(
+        exchange='',
+        routing_key='task_queue',
+        body=symbol,
+        properties=pika.BasicProperties(
+            delivery_mode=2,  # make message persistent
+        ))
+    connection.close()
+    return {'msg': 'adding'}
+
+
 class AddCompanyRequestHandler(Resource):
 
   def get(self, symbol=None):
@@ -20,15 +46,10 @@ class AddCompanyRequestHandler(Resource):
     if len(results)> 0:
       company = results[0]
       return {'msg': 'present', 'name': company.company_name}
-    print('connecting')
     credentials = pika.PlainCredentials('sarna', 'sarna')
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
-
-    print('channel')
     channel = connection.channel()
-    print('queue_declare')
     channel.queue_declare(queue='task_queue', durable=True)
-    print('basic_publish')
     channel.basic_publish(
         exchange='',
         routing_key='task_queue',
@@ -38,6 +59,7 @@ class AddCompanyRequestHandler(Resource):
         ))
     connection.close()
     return {'msg': 'adding'}
+
 
 class ActionDataRequestHandler(Resource):
 

@@ -17,15 +17,17 @@ def get_company_data(self,symbol):
 
 def callback(ch, method, properties, body):
     print(" [x] Received %s" % body)
-    cmd = body.decode()
+    symbol = body.decode()
+    
     
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
-db_conn = psycopg2.connect(database='sarna', user='postgres', host='0.0.0.0', password='sarna')
-cur = db_conn.cursor()
+
 
 credentials = pika.PlainCredentials('sarna', 'sarna')
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
+db_conn = psycopg2.connect(database='sarna', user='postgres', host='0.0.0.0', password='sarna')
+cur = db_conn.cursor()
 channel = connection.channel()
 channel.queue_declare(queue='task_queue', durable=True)
 channel.basic_qos(prefetch_count=1)

@@ -22,8 +22,24 @@ services:
   stockapiworker:
     build: stockapiworker
     volumes:
-      - ./stock-api-worker:/app
+      - stockapiworker:/app
     environment:
       - PYTHONUNBUFFERED=1
+    depends_on:
+      - database
+      - rabbitmq3
+    restart: always
+  predictionworker:
+    build: predictionworker
+    volumes:
+      - predictionworker:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - database
+      - rabbitmq3
+    restart: always
 volumes:
   db-data:
+  predictionworker:
+  stockapiworker:

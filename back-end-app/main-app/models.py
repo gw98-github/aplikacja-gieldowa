@@ -45,6 +45,30 @@ class Company (db.Model):
         self.symbol = symbol
         self.stock_id=stock_id
 
+class Future (db.Model):
+    __tablename__ = 'future'
+    id = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+    timestamp = db.Column(db.DateTime, nullable=False)
+
+    def __init__(self, company_id, timestamp, stock_id) -> None:
+        super().__init__()
+        self.company_id = company_id
+        self.timestamp=timestamp
+
+class Prediction (db.Model):
+    __tablename__ = 'prediction'
+    id = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.Integer, db.ForeignKey('future.id'))
+    timestamp = db.Column(db.DateTime, nullable=False)
+    value = db.Column(db.Float, unique=False, nullable=False)
+
+    def __init__(self, company_id, timestamp, value) -> None:
+        super().__init__()
+        self.company_id = company_id
+        self.timestamp=timestamp
+        self.value = value
+
 
 class Action (db.Model):
     __tablename__ = 'action'
