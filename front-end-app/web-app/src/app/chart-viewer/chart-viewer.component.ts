@@ -16,12 +16,12 @@ export class ChartViewerComponent implements OnInit {
   companyName: string = '';
 
   multi: any[];
-  data: Array<Array<{ name: Date; value: number }>> = [];
+  data: Array<Array<{ name: string; value: number }>> = [];
 
   viewSize: [number, number] = [800, 360];
 
   // options
-  showXAxis = true;
+  showXAxis = false;
   showYAxis = true;
   gradient = false;
   showXAxisLabel = true;
@@ -62,20 +62,20 @@ export class ChartViewerComponent implements OnInit {
   public onRefresh(): void {}
 
   createList(object: any) {
-    let data: Array<{ name: Date; value: number }> = [];
-    let dataPred: Array<{ name: Date; value: number }> = [];
+    let data: Array<{ name: string; value: number }> = [];
+    let dataPred: Array<{ name: string; value: number }> = [];
 
     const keys = Object.keys(object.data);
     const values = Object.values(object.data);
     for (let n = 0; n < keys.length; n++) {
-      data.push({ name: new Date(keys[n]), value: values[n] as number });
+      data.push({ name: keys[n], value: values[n] as number });
     }
 
     const keysPred = Object.keys(object.predict);
     const valuesPred = Object.values(object.predict);
     for (let n = 0; n < keysPred.length; n++) {
       dataPred.push({
-        name: new Date(keysPred[n]),
+        name: keysPred[n],
         value: valuesPred[n] as number,
       });
     }
