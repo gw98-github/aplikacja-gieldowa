@@ -49,7 +49,7 @@ def create_stock(db, name:str, apisource_id:int):
     return stock.id
 
 def create_company(db, name:str, stock_id:int):
-    company = Company(name, stock_id)
+    company = Company(name, name, stock_id)
     db.session.add(company)
     db.session.commit()
     return company.id

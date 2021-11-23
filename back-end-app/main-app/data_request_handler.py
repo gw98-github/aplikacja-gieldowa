@@ -23,10 +23,10 @@ class PredictRequestHandler(Resource):
     credentials = pika.PlainCredentials('sarna', 'sarna')
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
     channel = connection.channel()
-    channel.queue_declare(queue='task_queue', durable=True)
+    channel.queue_declare(queue='predict_queue', durable=True)
     channel.basic_publish(
         exchange='',
-        routing_key='task_queue',
+        routing_key='predict_queue',
         body=symbol,
         properties=pika.BasicProperties(
             delivery_mode=2,  # make message persistent
@@ -80,29 +80,12 @@ class ActionDataRequestHandler(Resource):
 
     data = {'company': company.company_name}
     actions = Action.query.filter(Action.company_id==company.id).order_by(desc(Action.timestamp)).limit(100)[::-1]
-    actions = [(action.timestamp.strftime('%Y-%m-%dT%H:%M:00'), action.value) for action in actions]
+    actions = [(datetime.fromtimestamp(action.timestamp).strftime('%Y.%m.%d %H:%M:00'), round(float(action.value / 1000.0), 2)) for e, action in enumerate(actions)]
 
     data['data'] = {t[0]:t[1] for t in actions[:-20]}
     data['predict'] = {t[0]:t[1] for t in actions[-21:]}
 
     return data
-
-  def post(self):
-    parser = reqparse.RequestParser()
-    parser.add_argument('type', type=str)
-    parser.add_argument('message', type=str)
-
-    args = parser.parse_args()
-
-    print(args)
-    # note, the post req from frontend needs to match the strings here (e.g. 'type and 'message')
-
-    request_type = args['type']
-    request_json = args['message']
-    # ret_status, ret_msg = ReturnData(request_type, request_json)
-    # currently just returning the req straight
-
-    return dane_z_nikad()
   
 
 class CompanyDataRequestHandler(Resource):
@@ -116,8 +99,8 @@ class CompanyDataRequestHandler(Resource):
     companies = Company.query.all()
     data = []
     td = timedelta(days = 7)
-    time_border = datetime.now() - td
-
+    time_border =  datetime.now() - td
+    time_border = int(datetime.timestamp(time_border))
     averages = db.session.query(Action.company_id, func.avg(Action.value)).filter(Action.timestamp>time_border).group_by(Action.company_id).all()
     counts = db.session.query(Action.company_id, func.count(Action.timestamp)).group_by(Action.company_id).all()
     companies = {company.id:company.company_name for company in Company.query.all()}
@@ -126,7 +109,7 @@ class CompanyDataRequestHandler(Resource):
       company:Company
       company_name = companies[avr_record[0]]
       
-      data.append({'name':company_name, 'record_count':count_record[1], 'week_avg':avr_record[1]})
+      data.append({'name':company_name, 'record_count':count_record[1], 'week_avg':round(float(avr_record[1]/1000), 2)})
     return data
         
 

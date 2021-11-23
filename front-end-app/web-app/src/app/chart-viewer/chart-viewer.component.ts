@@ -21,7 +21,7 @@ export class ChartViewerComponent implements OnInit {
   viewSize: [number, number] = [800, 360];
 
   // options
-  showXAxis = false;
+  showXAxis = true;
   showYAxis = true;
   gradient = false;
   showXAxisLabel = true;

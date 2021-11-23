@@ -4,7 +4,7 @@ from typing import List
 from app import db
 from models import Apisource, Stock, Company, Action
 from misc import dane_z_nikad
-
+import psycopg2
 from sqlalchemy import MetaData
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
@@ -39,28 +39,38 @@ def create_stock(db, name:str, apisource_id:int):
     db.session.commit()
     return stock.id
 
-def drop_table(table_name):
-    engine = create_engine(DATABASE_URI)
-    base = declarative_base()
-    metadata = MetaData(engine)
-    print(metadata.tables)
-    #base.metadata.drop_all(engine, [table], checkfirst=True)
+def drop_table(db_conn, cur, table_name):
+    try:
+        cur.execute(f"DELETE FROM {table_name}") 
+    except:
+        pass
+    db_conn.commit()
+    rows_deleted = cur.rowcount
+    return rows_deleted
     
 
 def clear_db(db):
     print('Removing Action, Company, Stock, Apisource tables...')
 
-    drop_table('action')
-
-    print('Creating apisource...')
-    api_id = create_apisource(db, 'Yahoo')
-    print('Creating stock...')
-    stock_id = create_stock(db, 'SomeStock', api_id)
+    db_conn = psycopg2.connect(database='sarna', user='postgres', host='0.0.0.0', password='sarna')
+    cur = db_conn.cursor()
+    #cur.execute(f"DROP TABLE IF EXISTS action CASCADE") 
+    #cur.execute(f"DROP TABLE IF EXISTS company CASCADE") 
+    #cur.execute(f"DROP TABLE IF EXISTS stock CASCADE") 
+    #cur.execute(f"DROP TABLE IF EXISTS api_source CASCADE") 
+    print(f"Deleting actions {drop_table(db_conn, cur, 'action')}")
+    print(f"Deleting company {drop_table(db_conn, cur, 'company')}")
+    print(f"Deleting stock {drop_table(db_conn, cur, 'stock')}")
+    print(f"Deleting apisource {drop_table(db_conn, cur, 'api_source')}")
+    
 
 
     print('Creating Action, Company, Stock, Apisource tables...')
     db.create_all()
+    print('Creating apisource...')
+    api_id = create_apisource(db, 'Yahoo')
+    print('Creating stock...')
+    stock_id = create_stock(db, 'SomeStock', api_id)
     db.session.commit()
-    drop_table('action')
 
 clear_db(db)
