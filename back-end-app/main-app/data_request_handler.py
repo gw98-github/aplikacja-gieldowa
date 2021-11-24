@@ -80,7 +80,7 @@ class ActionDataRequestHandler(Resource):
 
     data = {'company': company.company_name}
     actions = Action.query.filter(Action.company_id==company.id).order_by(desc(Action.timestamp)).limit(100)[::-1]
-    actions = [(datetime.fromtimestamp(action.timestamp).strftime('%Y.%m.%d %H:%M:00'), round(float(action.value / 1000.0), 2)) for e, action in enumerate(actions)]
+    actions = [(datetime.fromtimestamp(action.timestamp).strftime('%Y.%m.%d'), round(float(action.value / 1000.0), 2)) for e, action in enumerate(actions)]
 
     data['data'] = {t[0]:t[1] for t in actions[:-20]}
     data['predict'] = {t[0]:t[1] for t in actions[-21:]}

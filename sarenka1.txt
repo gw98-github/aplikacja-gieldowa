@@ -1,1 +1,3 @@
-ha, są dwie sarny
+psql -h 0.0.0.0 -p 5432 -U postgres
+
+sudo ss -lptn 'sport = :5432'

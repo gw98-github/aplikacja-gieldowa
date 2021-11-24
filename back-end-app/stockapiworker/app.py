@@ -7,7 +7,7 @@ def get_company_data(symbol):
     company = yf.Ticker(symbol)
     info = company.info
     name = info["longName"]
-    values = company.history(period="2y", interval='1h')
+    values = company.history(period="2y", interval='1d')
     time_data = []
     for i in values.index:
         dt = i.to_pydatetime()
