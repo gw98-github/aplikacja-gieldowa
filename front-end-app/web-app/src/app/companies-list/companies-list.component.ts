@@ -6,7 +6,10 @@ import { Router } from '@angular/router';
 
 export interface CompanyElement {
   name: string;
-  week_avg: number;
+  symbol: string;
+  growing: string;
+  growing_by: number;
+  value: number;
 }
 
 @Component({
@@ -16,7 +19,7 @@ export interface CompanyElement {
 })
 export class CompaniesListComponent implements OnInit {
   companies: Array<any> = [];
-  displayedColumns: string[] = ['number', 'name', 'week_avg', 'details'];
+  displayedColumns: string[] = ['number', 'name', 'symbol','value', 'growing', 'growing_by', 'details'];
   dataSource = new MatTableDataSource(this.companies);
 
   @ViewChild(MatPaginator) paginator?: MatPaginator;
@@ -26,6 +29,7 @@ export class CompaniesListComponent implements OnInit {
     private router: Router
   ) {
     this.stockDataService.getCompaniesList().subscribe((response) => {
+      console.log(response)
       this.companies = response.companies;
       this.dataSource.data = this.companies;
     });
@@ -40,4 +44,5 @@ export class CompaniesListComponent implements OnInit {
     // this.router.navigate(['/' + companyName]);
     this.router.navigate(['/company/' + companyName]);
   }
+
 }
