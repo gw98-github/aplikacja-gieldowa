@@ -18,7 +18,7 @@ export class HomeComponent implements OnInit {
       .subscribe((response) => {
         //next() callback
         this.popularList = response.popular;
-        console.log(this.popularList)
+        console.log(this.popularList[0])
 
       })
   }
