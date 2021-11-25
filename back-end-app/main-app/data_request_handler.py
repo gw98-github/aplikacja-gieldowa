@@ -5,7 +5,7 @@ import random
 import pika
 from sqlalchemy import func, desc
 from app import db
-from models import Company, Action, Stock, Apisource
+from models import Company, Action, Future, Prediction, Stock, Apisource
 
 from misc import dane_z_nikad
 
@@ -15,18 +15,14 @@ class PredictRequestHandler(Resource):
     return self.add_company(symbol)
 
   def add_company(self, symbol):
-    
-    results = Company.query.filter(Company.symbol == symbol).all()
-    if len(results)> 0:
-      company = results[0]
-      return {'msg': 'present', 'name': company.company_name}
+  
     credentials = pika.PlainCredentials('sarna', 'sarna')
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
     channel = connection.channel()
-    channel.queue_declare(queue='predict_queue', durable=True)
+    channel.queue_declare(queue='basicpred_queue', durable=True)
     channel.basic_publish(
         exchange='',
-        routing_key='predict_queue',
+        routing_key='basicpred_queue',
         body=symbol,
         properties=pika.BasicProperties(
             delivery_mode=2,  # make message persistent
@@ -92,10 +88,18 @@ class ActionDataRequestHandler(Resource):
 
     data = {'company': company.company_name}
     actions = Action.query.filter(Action.company_id==company.id).order_by(desc(Action.timestamp)).limit(100)[::-1]
-    actions = [(datetime.fromtimestamp(action.timestamp).strftime('%Y.%m.%d'), round(float(action.value / 1000.0), 2)) for e, action in enumerate(actions)]
+    future = Future.query.filter(Future.company_id==company.id).all()
+    if len(future) > 0:
+      future = future[0]
+      predict = Prediction.query.filter(Prediction.company_id==future.id).order_by(desc(Prediction.timestamp))[::-1]
+    else:
+      predict = []
 
-    data['data'] = {t[0]:t[1] for t in actions[:-20]}
-    data['predict'] = {t[0]:t[1] for t in actions[-21:]}
+    actions = [(datetime.fromtimestamp(action.timestamp).strftime('%Y.%m.%d'), round(float(action.value / 1000.0), 2)) for e, action in enumerate(actions)]
+    predict = [(datetime.fromtimestamp(pred.timestamp).strftime('%Y.%m.%d'), round(float(pred.value / 1000.0), 2)) for e, pred in enumerate(predict)]
+    data['data'] = {t[0]:t[1] for t in actions}
+
+    data['predict'] = {t[0]:t[1] for t in predict}
 
     return data
   

@@ -34,10 +34,10 @@ services:
       - database
       - rabbitmq3
     restart: always
-  predictiondispatcher:
-    image: predictiondispatcher
+  basicpredworker:
+    image: basicpredworker
     volumes:
-      - predictiondispatcher:/app
+      - basicpredworker:/app
     environment:
       - PYTHONUNBUFFERED=1
     depends_on:
@@ -46,5 +46,5 @@ services:
     restart: always
 volumes:
   db-data:
-  predictiondispatcher:
+  basicpredworker:
   stockapiworker:

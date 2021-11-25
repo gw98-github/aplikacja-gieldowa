@@ -3,6 +3,13 @@ import yfinance as yf
 import psycopg2
 from datetime import datetime
 
+
+try:
+    db_conn = psycopg2.connect(database='sarna', user='postgres', host='postgress', password='sarna')
+except:
+    db_conn = psycopg2.connect(database='sarna', user='postgres', host='0.0.0.0', password='sarna')
+cur = db_conn.cursor()
+
 def get_company_data(symbol):
     company = yf.Ticker(symbol)
     info = company.info
@@ -14,8 +21,7 @@ def get_company_data(symbol):
         time_data.append((int(1000 * values.at[i,"Open"]), int(datetime.timestamp(dt))))
     return {'symbol':symbol, 'name':name, 'records':time_data}
 
-db_conn = psycopg2.connect(database='sarna', user='postgres', host='postgress', password='sarna')
-cur = db_conn.cursor()
+
 
 def write_in_database(symbol,company_name,time_data):
     cur.execute("SELECT id FROM stock")
@@ -60,7 +66,11 @@ def callback(ch, method, properties, body):
 
 
 credentials = pika.PlainCredentials('sarna', 'sarna')
-connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
+try:
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
+except:
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='0.0.0.0', credentials=credentials))
+
 
 channel = connection.channel()
 channel.queue_declare(queue='task_queue', durable=True)
