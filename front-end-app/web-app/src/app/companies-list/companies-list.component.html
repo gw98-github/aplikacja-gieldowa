@@ -1,4 +1,13 @@
 <div class="mat-elevation-z8">
+  <div class="flex-container">
+    <div><button
+      mat-raised-button
+      color="primary"
+      color="primary"
+      (click)=openAdditionForm()>
+      Dodaj spółkę
+    </button></div>
+  </div>
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
     <ng-container matColumnDef="number">
       <th

@@ -9,3 +9,10 @@ mat-paginator {
   width: 90%;
   margin: auto;
 }
+.flex-container {
+  display: flex;
+  width: 90%;
+  margin: auto;
+  margin-bottom: 10px;
+  justify-content: flex-end;
+}

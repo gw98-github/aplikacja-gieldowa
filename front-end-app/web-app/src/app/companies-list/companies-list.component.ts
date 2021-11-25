@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, Input } from '@angular/core';
 import { StockDataService } from '../services/stock-data.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -43,6 +43,15 @@ export class CompaniesListComponent implements OnInit {
   openCompanyPage(companyName: any) {
     // this.router.navigate(['/' + companyName]);
     this.router.navigate(['/company/' + companyName]);
+  }
+
+  openAdditionForm() {
+    var user_input;
+    user_input = prompt("Symbol spółki", "Tu wpisz symbol spółki");
+    if (user_input != null) {
+      var url = 'http://127.0.0.1:5000/flask/add_company/' + user_input;
+      window.open(url,"_blank");
+    }
   }
 
 }
