@@ -1,10 +1,8 @@
 import pika
-from sqlalchemy import sql
 import yfinance as yf
 import psycopg2
 from datetime import datetime, timedelta
 import time
-import math
 
 
 
@@ -49,29 +47,26 @@ def timestamp_to_dt(timestamp):
     return datetime.fromtimestamp(timestamp)
 
 
-step_seconds=45*60 
+step_seconds=45*60
 
 
 def run(): 
-
+    print(f"\t  [x] Starting checking...")
     cur = db_conn.cursor()
 
     find_company = "SELECT * FROM company ;"
-
-    
     while True:
         start=datetime.now()
         cur.execute(find_company)
 
         companies = cur.fetchall()
-
-
+        print(f"\t  [x] Got {len(companies)} companies...")
+        updates = 0
         for company_id,c_name,c_symbol,c_stock in companies:
             sql = "SELECT * FROM action WHERE company_id = %s order by timestamp DESC;"
             cur.execute(sql, (company_id,))
             action = cur.fetchone()
             action_dt = timestamp_to_dt(action[2])
-            print (action [0])
             current_company = yf.Ticker(c_symbol)
             values = current_company.history(start=action_dt+timedelta(hours=1), interval='1d')
             time_data = []
@@ -81,12 +76,17 @@ def run():
             if time_data[0][0]==action[1]:
                 time_data=time_data[1:]
             sql = "INSERT INTO action(value, timestamp, company_id) VALUES(%s,%s,%s)"
+            if len(time_data) > 0:
+                updates += 1
             for r in time_data:
                 cur.execute(sql, (r[0], r[1], company_id))
                 db_conn.commit()
+            time.sleep(1)
         end=datetime.now()
         delta=end-start
+        print(f"\t  [x] Updated {updates} companies.")
+        print(f"\t  [x] Waiting {step_seconds-delta.seconds} seconds...")
         time.sleep(max(0,step_seconds-delta.seconds))
-    
+print('[X]   Connected to all.')
 run()
 
