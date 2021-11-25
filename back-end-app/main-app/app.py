@@ -28,11 +28,12 @@ api = Api(app)
 def serve(path):
     return send_from_directory(app.static_folder,'index.html')
 
-from data_request_handler import ActionDataRequestHandler, AddCompanyRequestHandler, CompanyDataRequestHandler, PredictRequestHandler
+from data_request_handler import ActionDataRequestHandler, AddCompanyRequestHandler, CompanyDataRequestHandler, PopularCompanyRequestHandler, PredictRequestHandler
 api.add_resource(ActionDataRequestHandler, '/flask/data/<company>')
 api.add_resource(AddCompanyRequestHandler, '/flask/add_company/<symbol>')
 api.add_resource(PredictRequestHandler, '/flask/predict/<symbol>')
 api.add_resource(CompanyDataRequestHandler, '/flask/list/companies')
+api.add_resource(PopularCompanyRequestHandler, '/flask/popular')
 
 
 if __name__ == '__main__':

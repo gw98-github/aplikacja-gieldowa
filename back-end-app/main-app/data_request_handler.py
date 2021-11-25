@@ -61,6 +61,18 @@ class AddCompanyRequestHandler(Resource):
     return {'msg': 'adding'}
 
 
+class PopularCompanyRequestHandler(Resource):
+
+  def get(self, symbol=None):
+    return self.add_company(symbol)
+
+  def add_company(self, symbol):
+    companies: List[Company]
+    companies = Company.query.limit(4)
+    
+    return {'popular': [x.symbol for x in companies]}
+
+
 class ActionDataRequestHandler(Resource):
 
   def get(self, company=None):
@@ -98,18 +110,16 @@ class CompanyDataRequestHandler(Resource):
   def fetch_companies_data(self):
     companies = Company.query.all()
     data = []
-    td = timedelta(days = 7)
-    time_border =  datetime.now() - td
-    time_border = int(datetime.timestamp(time_border))
-    averages = db.session.query(Action.company_id, func.avg(Action.value)).filter(Action.timestamp>time_border).group_by(Action.company_id).all()
-    counts = db.session.query(Action.company_id, func.count(Action.timestamp)).group_by(Action.company_id).all()
-    companies = {company.id:company.company_name for company in Company.query.all()}
-
-    for avr_record, count_record in zip(averages, counts):
+    
+    for company in Company.query.all():
       company:Company
-      company_name = companies[avr_record[0]]
-      
-      data.append({'name':company_name, 'record_count':count_record[1], 'week_avg':round(float(avr_record[1]/1000), 2)})
+      actions = Action.query.filter(Action.company_id==company.id).order_by(desc(Action.timestamp)).limit(2)[::-1]
+      groing_by = (actions[1].value - actions[0].value) / 1000.0
+      if groing_by > 0:
+        is_groing = 'yes'
+      else:
+        is_groing = 'no'
+      data.append({'name':company.company_name, 'symbol':company.symbol, 'growing':is_groing, 'growing_by':groing_by, 'value':actions[1].value / 1000.0})
     return data
         
 
