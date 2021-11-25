@@ -8,18 +8,19 @@ import { StockDataService } from '../services/stock-data.service';
 })
 export class HomeComponent implements OnInit {
 
-  popularList: any = [];
+  popularList: any;
+
+
 
   constructor(private stockDataService: StockDataService) { }
+
 
   ngOnInit(): void {
     this.stockDataService
       .getPopularCompanies()
       .subscribe((response) => {
         //next() callback
-        this.popularList = response.popular;
-        console.log(this.popularList[0])
-
+        this.popularList = response.popular
       })
   }
 
