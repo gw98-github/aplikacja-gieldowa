@@ -24,8 +24,21 @@ jak jakiegos obrazu brakuje i o niego krzyczy to tylko nazwy odpowiednie wstawi�
 sudo docker build ./brakujacy_obraz/ -t brakujacy_obraz:latest --no-cache
 
 
-jeśli docker się wykrzacza na postgresie
+jeśli docker się wykrzacza na postgresie należy zabić postgresa:
 
+wyszukujesz pida procesu:
+sudo ss -lptn 'sport = :5432'
+
+wyskoczy cos takiego, albo podobnego:
+State        Recv-Q       Send-Q             Local Address:Port              Peer Address:Port       Process                                        
+LISTEN       0            4096                     0.0.0.0:5432                   0.0.0.0:*           users:(("docker-proxy",pid=43397,fd=4))
+
+w zakładce 'Process' mamy pid=jakiś_numer_pid
+
+potem puszczamy:
+sudo kill -9 jakiś_numer_pid
+
+potem można odpalać dockera
 
 http://127.0.0.1:5000/flask/add_company/TSLA
 http://127.0.0.1:5000/flask/add_company/RBLX
