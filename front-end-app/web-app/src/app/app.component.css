@@ -5,9 +5,14 @@
 .title {
   font-family: "Lucida Console", "Courier New", monospace;
   size: 120rem;
+  margin-right: 40px;
 }
 
 .mat-toolbar.mat-primary {
   background: #333333;
   color: #d9d9d9;
+}
+
+button{
+  margin: 0 30px 0 30px;
 }

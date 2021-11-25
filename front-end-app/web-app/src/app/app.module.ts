@@ -16,9 +16,12 @@ import { Routes, RouterModule } from '@angular/router';
 import { CompanyComponent } from './company/company.component';
 import { HomeComponent } from './home/home.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { NewDataComponent } from './new-data/new-data.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
+  { path: 'list', component: CompaniesListComponent },
+  { path: 'new-data', component: NewDataComponent},
   { path: 'company/:id', component: CompanyComponent },
 ];
 @NgModule({
@@ -28,6 +31,7 @@ const routes: Routes = [
     CompaniesListComponent,
     CompanyComponent,
     HomeComponent,
+    NewDataComponent,
   ],
   imports: [
     BrowserModule,

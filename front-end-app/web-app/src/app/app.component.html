@@ -4,6 +4,9 @@
       ><img src="../assets/logo.svg" class="logo-image"
     /></a>
     <span class="title">S.A.R.N.A.</span>
+    <button mat-raised-button color="primary" (click)="openHomePage()" >STRONA GŁÓWNA</button>
+    <button mat-raised-button color="primary" (click)="openListPage()">LISTA SPÓŁEK</button>
+    <button mat-raised-button color="primary" (click)="openNewDataPage()">WPROWADŹ WŁASNE DANE</button>
   </mat-toolbar>
 </p>
 <router-outlet></router-outlet>
