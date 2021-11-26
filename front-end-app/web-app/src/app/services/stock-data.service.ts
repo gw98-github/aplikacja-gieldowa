@@ -32,7 +32,13 @@ export class StockDataService {
   }
 
   getPopularCompanies(): Observable<any> {
-    return this.http.get(this.baseURL + '/popular' , {
+    return this.http.get(this.baseURL + '/popular', {
+      headers: { header: 'Access-Control-Allow-Origin' },
+    });
+  }
+
+  addNewCompany(name: string): Observable<any> {
+    return this.http.get(this.baseURL + '/add_company/' + name, {
       headers: { header: 'Access-Control-Allow-Origin' },
     });
   }

@@ -17,6 +17,7 @@ import { CompanyComponent } from './company/company.component';
 import { HomeComponent } from './home/home.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { NewDataComponent } from './new-data/new-data.component';
+import {MatGridListModule} from '@angular/material/grid-list';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -43,6 +44,7 @@ const routes: Routes = [
     NgxChartsModule,
     HttpClientModule,
     MatTableModule,
+    MatGridListModule,
     MatPaginatorModule,
     RouterModule.forRoot(routes),
   ],
