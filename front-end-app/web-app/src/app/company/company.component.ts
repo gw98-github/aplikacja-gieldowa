@@ -20,6 +20,9 @@ export class CompanyComponent implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       this.id = params.id;
+      this.stockDataService.getCompanyData(this.id).subscribe((response) => {
+        this.companyName = response.company;
+      });
     });
   }
 }
