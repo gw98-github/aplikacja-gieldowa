@@ -7,6 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSortModule } from '@angular/material/sort';
 import { ChartViewerComponent } from './chart-viewer/chart-viewer.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { HttpClientModule } from '@angular/common/http';
@@ -17,12 +18,12 @@ import { CompanyComponent } from './company/company.component';
 import { HomeComponent } from './home/home.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { NewDataComponent } from './new-data/new-data.component';
-import {MatGridListModule} from '@angular/material/grid-list';
+import { MatGridListModule } from '@angular/material/grid-list';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'list', component: CompaniesListComponent },
-  { path: 'new-data', component: NewDataComponent},
+  { path: 'new-data', component: NewDataComponent },
   { path: 'company/:id', component: CompanyComponent },
 ];
 @NgModule({
@@ -40,6 +41,7 @@ const routes: Routes = [
     BrowserAnimationsModule,
     MatToolbarModule,
     MatButtonModule,
+    MatSortModule,
     MatIconModule,
     NgxChartsModule,
     HttpClientModule,

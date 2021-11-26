@@ -9,6 +9,7 @@ import { StockDataService } from '../services/stock-data.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
+import { MatSort } from '@angular/material/sort';
 
 export interface CompanyElement {
   name: string;
@@ -37,6 +38,7 @@ export class CompaniesListComponent implements OnInit {
   dataSource = new MatTableDataSource(this.companies);
 
   @ViewChild(MatPaginator) paginator?: MatPaginator;
+  @ViewChild(MatSort) sort?: MatSort;
 
   constructor(
     private stockDataService: StockDataService,
@@ -48,6 +50,7 @@ export class CompaniesListComponent implements OnInit {
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator!;
+    this.dataSource.sort = this.sort!;
   }
 
   openCompanyPage(companyName: any) {
