@@ -18,6 +18,7 @@ export class ChartViewerComponent implements OnInit {
   multi: any[];
   data: Array<Array<{ name: string; value: number }>> = [];
 
+  @Input()
   viewSize: [number, number] = [800, 360];
 
   // options
