@@ -1,12 +1,19 @@
 <div class="mat-elevation-z8">
   <div class="flex-container">
-    <div>
-      <button
-        mat-raised-button
-        color="primary"
-        color="primary"
-        (click)="openAdditionForm()"
-      >
+    <div style="width: 100%; margin-left: 30px">
+      <mat-form-field appearance="standard">
+        <mat-label>Wyszukiwanie</mat-label>
+        <input
+          matInput
+          (keyup)="applyFilter($event)"
+          placeholder="np. Tesla"
+          style="color: black"
+          #input
+        />
+      </mat-form-field>
+    </div>
+    <div class="add-button">
+      <button mat-raised-button color="primary" (click)="openAdditionForm()">
         Dodaj spółkę
       </button>
     </div>

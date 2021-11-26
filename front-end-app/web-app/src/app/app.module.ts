@@ -19,6 +19,8 @@ import { HomeComponent } from './home/home.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { NewDataComponent } from './new-data/new-data.component';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -43,6 +45,8 @@ const routes: Routes = [
     MatButtonModule,
     MatSortModule,
     MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
     NgxChartsModule,
     HttpClientModule,
     MatTableModule,
