@@ -27,8 +27,6 @@ export class HomeComponent implements OnInit {
     this.innerWidth = window.innerWidth;
     this.chartWidth = window.innerWidth / 2 - 200;
     this.chartHeigh = this.chartWidth / 2;
-
-    console.log(this.innerWidth);
   }
 
   isSmallWindowSize() {
