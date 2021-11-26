@@ -16,11 +16,16 @@ import { MatTableModule } from '@angular/material/table';
 import { Routes, RouterModule } from '@angular/router';
 import { CompanyComponent } from './company/company.component';
 import { HomeComponent } from './home/home.component';
+import { DialogAddCompanyDialog } from './companies-list/companies-list.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { NewDataComponent } from './new-data/new-data.component';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { FormsModule } from '@angular/forms';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -36,6 +41,7 @@ const routes: Routes = [
     CompanyComponent,
     HomeComponent,
     NewDataComponent,
+    DialogAddCompanyDialog,
   ],
   imports: [
     BrowserModule,
@@ -47,6 +53,10 @@ const routes: Routes = [
     MatIconModule,
     MatInputModule,
     MatFormFieldModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatDialogModule,
+    FormsModule,
     NgxChartsModule,
     HttpClientModule,
     MatTableModule,
@@ -56,6 +66,6 @@ const routes: Routes = [
   ],
   providers: [],
   bootstrap: [AppComponent],
-  exports: [RouterModule],
+  exports: [RouterModule, MatButtonModule, MatFormFieldModule, MatInputModule],
 })
 export class AppModule {}
