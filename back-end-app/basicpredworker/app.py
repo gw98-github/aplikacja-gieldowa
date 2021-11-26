@@ -17,7 +17,7 @@ model = LSTM()
 model.load_state_dict(torch.load('./base_model.model'))
 
 
-def run_model(steps:int=100, end:datetime=None, step_time:timedelta=None, beg_val:int=400, 
+def run_model_spoofed(steps:int=100, end:datetime=None, step_time:timedelta=None, beg_val:int=400, 
     stringify=False, fluctuation=100, as_tuples:bool=False):
     if not step_time:
         step_time = timedelta(hours=1)
@@ -37,27 +37,38 @@ def run_model(steps:int=100, end:datetime=None, step_time:timedelta=None, beg_va
         return data
     return {t[0]: t[1] for t in data}
 
-def run_model2(raw_data, steps=20):
+def run_model(raw_data, steps=20):
     scaler = MinMaxScaler(feature_range=(-1, 1))
+    pred = fit_and_blowup_data(raw_data, scaler)
+    pred = predict_steps(pred, steps)
+    flat_pred = refit_and_flatten_data(raw_data, pred, scaler, steps)
+    return flat_pred
+
+def predict_steps(data, steps):
+    for step in range(steps):
+        pred_step = model(data)
+        pred_step = pred_step.detach()
+        pred_step = torch.reshape(pred_step, (1, 1, 1))
+        data = torch.cat((data, pred_step), dim=1)
+    return data
+
+def fit_and_blowup_data(raw_data, scaler):
     raw_data = numpy.array(raw_data)
     fit_data = scaler.fit_transform(raw_data.reshape(-1,1))
     fit_data = torch.from_numpy(fit_data).type(torch.Tensor)
     fit_data = torch.reshape(fit_data, (1,-1, 1))
-    pred = fit_data.detach().clone()
-    for step in range(steps):
-        pred_step = model(pred)
-        pred_step = pred_step.detach()
-        pred_step = torch.reshape(pred_step, (1, 1, 1))
-        pred = torch.cat((pred, pred_step), dim=1)
+    return fit_data.detach().clone()
+
+def refit_and_flatten_data(raw_data, pred, scaler, steps):
     pred = scaler.inverse_transform(torch.reshape(pred.detach(), (-1, 1)).numpy())
     pred = list(pred.flatten()[-(steps+1):])
     avg = sum(raw_data[-steps:]) / steps
     noise = [x - avg for x in raw_data[-steps - 20:-20]]
+    noise.reverse()
     noise[0]=0
     noise[1]=0
     pred = [x + y/2 for x, y in zip(pred, noise)]
     return pred
-
 
 
 def callback(ch, method, properties, body):
@@ -98,8 +109,8 @@ def callback(ch, method, properties, body):
     print(f"\t[x] Predicting {steps} steps...")
     values = [x[1]/ 1000.0 for x in actions]
     values.reverse()
-    #pred = run_model(steps=steps, end=now_dt, step_time=timedelta(days=1), as_tuples=True, beg_val=action_value / 1000.0)
-    pred = run_model2(values)
+    #pred = run_model_spoofed(steps=steps, end=now_dt, step_time=timedelta(days=1), as_tuples=True, beg_val=action_value / 1000.0)
+    pred = run_model(values, steps=20)
     
     sql = "INSERT INTO prediction(value, timestamp, company_id) VALUES(%s,%s,%s)"
     print(f"\t[x] Inserting into future...")

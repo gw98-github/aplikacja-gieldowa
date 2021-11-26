@@ -44,3 +44,7 @@ http://127.0.0.1:5000/flask/add_company/TSLA
 http://127.0.0.1:5000/flask/add_company/RBLX
 http://127.0.0.1:5000/flask/add_company/PFE
 http://127.0.0.1:5000/flask/add_company/NVDA
+
+
+kady worker moze byc odpalony z ręki używając w jego folderze komendy:
+python3 app.py

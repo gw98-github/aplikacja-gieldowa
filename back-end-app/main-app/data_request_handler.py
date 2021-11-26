@@ -66,7 +66,7 @@ class PopularCompanyRequestHandler(Resource):
     companies: List[Company]
     companies = Company.query.limit(4)
     
-    return {'popular': [x.symbol for x in companies]}
+    return {'popular': [[x.symbol, x.company_name] for x in companies]}
 
 
 class ActionDataRequestHandler(Resource):
