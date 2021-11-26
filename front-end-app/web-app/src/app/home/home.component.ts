@@ -19,7 +19,7 @@ export class HomeComponent implements OnInit {
       //next() callback
       this.popularList = response.popular;
     });
-    this.onResize(null);
+    this.onResize(window);
   }
 
   @HostListener('window:resize', ['$event'])

@@ -6,6 +6,10 @@
       [gradient]="gradient"
       [xAxis]="showXAxis"
       [yAxis]="showYAxis"
+      [xAxisTicks]="[
+        multi[0].series[0].name,
+        multi[0].series[multi[0].series.length - 1].name
+      ]"
       [showXAxisLabel]="showXAxisLabel"
       [showYAxisLabel]="showYAxisLabel"
       [xAxisLabel]="xAxisLabel"
