@@ -24,6 +24,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { FormsModule } from '@angular/forms';
 import { AddNewCompanyComponent } from './add-new-company/add-new-company.component';
@@ -56,6 +57,7 @@ const routes: Routes = [
     MatIconModule,
     MatInputModule,
     MatFormFieldModule,
+    MatProgressBarModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatDialogModule,

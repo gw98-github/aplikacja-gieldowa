@@ -13,11 +13,19 @@
     />
   </mat-form-field>
 </div>
+<div *ngIf="filteredCandidates == undefined || filteredCandidates == []">
+  <mat-progress-bar
+    mode="indeterminate"
+    style="width: 90%; margin: auto; margin-top: 50px"
+  ></mat-progress-bar>
+</div>
 <div class="main-container">
   <div *ngFor="let candidate of filteredCandidates">
     <div class="card">
       {{ candidate[0] }} [ {{ candidate[1] }} ]
-      <mat-icon style="margin-left: 3px" color="primary">add_box</mat-icon>
+      <button mat-icon-button (click)="addCompany(candidate[1])">
+        <mat-icon style="margin-left: 3px" color="primary">add_box</mat-icon>
+      </button>
     </div>
   </div>
 </div>

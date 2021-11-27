@@ -10,13 +10,25 @@ export class AddNewCompanyComponent implements OnInit {
   candidates: any;
   filteredCandidates: any;
 
-  constructor(private stockDataService: StockDataService) {}
+  constructor(private stockDataService: StockDataService) {
+    console.log(this.filteredCandidates);
+  }
 
   ngOnInit(): void {
     this.stockDataService.getCandidatesList().subscribe((response) => {
       this.candidates = response.candidates;
       this.filteredCandidates = this.candidates;
     });
+  }
+
+  addCompany(name: string) {
+    this.candidates = this.candidates.filter((s: any) => {
+      return s[1] != name;
+    });
+    this.filteredCandidates = this.filteredCandidates.filter((s: any) => {
+      return s[1] != name;
+    });
+    this.stockDataService.addNewCompany(name).subscribe();
   }
 
   applyFilter(event: Event) {
