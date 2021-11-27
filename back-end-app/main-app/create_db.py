@@ -9,8 +9,9 @@ from sqlalchemy import MetaData
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.declarative import declarative_base
+import pika
 
-
+some_symbols = ["OEDV", "AAPL", "BAC", "AMZN", "T", "GOOG", "MO", "DAL", "AA", "AXP", "DD", "BABA", "ABT", "UA", "AMAT", "AMGN"]
 
 db_user = 'postgres'
 db_password = 'sarna'
@@ -19,6 +20,20 @@ db_port = 5432
 db_name = 'sarna'
 
 DATABASE_URI = f'postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+
+def request_data(message):
+    credentials = pika.PlainCredentials('sarna', 'sarna')
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
+    channel = connection.channel()
+    channel.queue_declare(queue='task_queue', durable=True)
+    channel.basic_publish(
+        exchange='',
+        routing_key='task_queue',
+        body=message,
+        properties=pika.BasicProperties(
+            delivery_mode=2,
+        ))
+    connection.close()
 
 try:
     from tqdm import tqdm
@@ -42,9 +57,9 @@ def create_stock(db, name:str, apisource_id:int):
 def drop_table(db_conn, cur, table_name):
     try:
         cur.execute(f"DELETE FROM {table_name}") 
+        db_conn.commit()
     except:
         pass
-    db_conn.commit()
     rows_deleted = cur.rowcount
     return rows_deleted
     
@@ -58,6 +73,9 @@ def clear_db(db):
     #cur.execute(f"DROP TABLE IF EXISTS company CASCADE") 
     #cur.execute(f"DROP TABLE IF EXISTS stock CASCADE") 
     #cur.execute(f"DROP TABLE IF EXISTS api_source CASCADE") 
+    print(f"Deleting candidates {drop_table(db_conn, cur, 'candidate')}")
+    print(f"Deleting predictions {drop_table(db_conn, cur, 'prediction')}")
+    print(f"Deleting futures {drop_table(db_conn, cur, 'future')}")
     print(f"Deleting actions {drop_table(db_conn, cur, 'action')}")
     print(f"Deleting company {drop_table(db_conn, cur, 'company')}")
     print(f"Deleting stock {drop_table(db_conn, cur, 'stock')}")
@@ -72,5 +90,16 @@ def clear_db(db):
     print('Creating stock...')
     stock_id = create_stock(db, 'SomeStock', api_id)
     db.session.commit()
+    print('Filling candidates...')
+    with open('stock_combined.txt', 'r', encoding='utf8') as fi:
+        sql = "INSERT INTO candidate(symbol, name) VALUES(%s,%s)"
+        records = [x.strip().split(';') for x in fi]
+        for symbol, name in tqdm(records[32:1032]):
+            cur.execute(sql, (symbol, name, ))
+            db_conn.commit()
+            pass
+    print('Filling companies with real data...')
+    for symbol, name in tqdm(records[:32]):
+        request_data(symbol)
 
 clear_db(db)

@@ -3,9 +3,9 @@ from flask_restful import Api, Resource, reqparse
 from datetime import datetime, timedelta
 import random
 import pika
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, asc
 from app import db
-from models import Company, Action, Future, Prediction, Stock, Apisource
+from models import Candidate, Company, Action, Future, Prediction, Stock, Apisource
 
 from misc import dane_z_nikad
 
@@ -104,6 +104,21 @@ class ActionDataRequestHandler(Resource):
     return data
   
 
+with open('stock_combined.txt', 'r', encoding='utf8') as fi:
+  candidates = sorted([x.split(';') for x in fi], key=lambda y: y[1])
+
+class CandidateRequestHandler(Resource):
+
+  def get(self,):
+    return self.fetch_company_data()
+
+  def fetch_company_data(self):
+    
+    companies = set(c.symbol for c in Company.query.all())
+    candidates = list(filter(lambda x: x[1] not in companies, [(c.name, c.symbol) for c in  Candidate.query.order_by(asc(Candidate.name)).all()]))
+    return {'candidates':candidates}
+  
+
 class CompanyDataRequestHandler(Resource):
 
   def get(self):
@@ -117,8 +132,8 @@ class CompanyDataRequestHandler(Resource):
     
     for company in Company.query.all():
       company:Company
-      actions = Action.query.filter(Action.company_id==company.id).order_by(desc(Action.timestamp)).limit(2)[::-1]
-      groing_by = (actions[1].value - actions[0].value) / 1000.0
+      actions = Action.query.filter(Action.company_id==company.id).order_by(desc(Action.timestamp))[:2]
+      groing_by = (actions[0].value - actions[1].value) / 1000.0
       if groing_by > 0:
         is_groing = 'yes'
       else:

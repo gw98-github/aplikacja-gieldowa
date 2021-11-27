@@ -1,5 +1,7 @@
 from app import db
 from datetime import datetime
+
+
 class Apisource(db.Model):
     __tablename__ = 'api_source'
     id = db.Column(db.Integer, primary_key=True)
@@ -68,6 +70,16 @@ class Prediction (db.Model):
         self.company_id = company_id
         self.timestamp=timestamp
         self.value = value
+
+class Candidate (db.Model):
+    __tablename__ = 'candidate'
+    id = db.Column(db.Integer, primary_key=True)
+    symbol = db.Column(db.String(10), nullable=False)
+    name = db.Column(db.String(160), nullable=False)
+    def __init__(self, company_id, symbol, name) -> None:
+        super().__init__()
+        self.symbol=symbol
+        self.name = name
 
 
 class Action (db.Model):
