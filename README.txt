@@ -48,3 +48,7 @@ http://127.0.0.1:5000/flask/add_company/NVDA
 
 kady worker moze byc odpalony z ręki używając w jego folderze komendy:
 python3 app.py
+
+
+łączenie z bazą danych:
+psql -h 0.0.0.0 -p 5432 -U postgres
