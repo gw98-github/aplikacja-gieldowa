@@ -26,11 +26,13 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { FormsModule } from '@angular/forms';
+import { AddNewCompanyComponent } from './add-new-company/add-new-company.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'list', component: CompaniesListComponent },
   { path: 'new-data', component: NewDataComponent },
+  { path: 'add-company', component: AddNewCompanyComponent },
   { path: 'company/:id', component: CompanyComponent },
 ];
 @NgModule({
@@ -42,6 +44,7 @@ const routes: Routes = [
     HomeComponent,
     NewDataComponent,
     DialogAddCompanyDialog,
+    AddNewCompanyComponent,
   ],
   imports: [
     BrowserModule,
