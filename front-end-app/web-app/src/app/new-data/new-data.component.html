@@ -1,1 +1,11 @@
-<p>new-data works!</p>
+<input
+  #csvInput
+  hidden="true"
+  type="file"
+  onclick="this.value=null"
+  (change)="csvInputChange($event)"
+  accept=".csv,.txt,.json,.xml"
+/>
+<button mat-flat-button color="primary" (click)="csvInput.click()">
+  Dodaj plik
+</button>

@@ -10,9 +10,7 @@ export class AddNewCompanyComponent implements OnInit {
   candidates: any;
   filteredCandidates: any;
 
-  constructor(private stockDataService: StockDataService) {
-    console.log(this.filteredCandidates);
-  }
+  constructor(private stockDataService: StockDataService) {}
 
   ngOnInit(): void {
     this.stockDataService.getCandidatesList().subscribe((response) => {

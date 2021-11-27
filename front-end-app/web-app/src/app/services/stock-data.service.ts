@@ -48,4 +48,10 @@ export class StockDataService {
       headers: { header: 'Access-Control-Allow-Origin' },
     });
   }
+
+  postFileWithData(file: any) {
+    return this.http.post(this.baseURL + '/upload-data', file, {
+      headers: { header: 'Access-Control-Allow-Origin' },
+    });
+  }
 }
