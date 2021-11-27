@@ -19,6 +19,16 @@ export class AddNewCompanyComponent implements OnInit {
     });
   }
 
+  addCompany(name: string) {
+    this.candidates = this.candidates.filter((s: any) => {
+      return s[1] != name;
+    });
+    this.filteredCandidates = this.filteredCandidates.filter((s: any) => {
+      return s[1] != name;
+    });
+    this.stockDataService.addNewCompany(name).subscribe();
+  }
+
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value
       .trim()
