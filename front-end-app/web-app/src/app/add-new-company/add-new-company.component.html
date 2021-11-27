@@ -13,6 +13,12 @@
     />
   </mat-form-field>
 </div>
+<div *ngIf="filteredCandidates == undefined || filteredCandidates == []">
+  <mat-progress-bar
+    mode="indeterminate"
+    style="width: 90%; margin: auto; margin-top: 50px"
+  ></mat-progress-bar>
+</div>
 <div class="main-container">
   <div *ngFor="let candidate of filteredCandidates">
     <div class="card">
