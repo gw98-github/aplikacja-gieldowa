@@ -13,7 +13,7 @@ z folderu workera
 
 Docker (wszystko w back-end-app/):
 
-Usunięcie wszystkiego:
+Usunięcie wszystkich obrazów, dysków itd, do świeżego builda:
 sudo docker system prune --all --volumes -f
 
 Budowanie workerów:
@@ -54,3 +54,10 @@ python3 app.py
 
 łączenie z bazą danych:
 psql -h 0.0.0.0 -p 5432 -U postgres
+
+DROP DATABASE sarna WITH (FORCE);
+CREATE DATABASE sarna;
+
+
+a potem wpisanie rzeczy do bazy używając:
+2)back (flask) ...back-end-app/main-app$ python3 create_db.py
