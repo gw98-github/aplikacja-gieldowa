@@ -37,6 +37,12 @@ export class StockDataService {
     });
   }
 
+  getCandidatesList(): Observable<any> {
+    return this.http.get(this.baseURL + '/candidates', {
+      headers: { header: 'Access-Control-Allow-Origin' },
+    });
+  }
+
   addNewCompany(name: string): Observable<any> {
     return this.http.get(this.baseURL + '/add_company/' + name, {
       headers: { header: 'Access-Control-Allow-Origin' },
