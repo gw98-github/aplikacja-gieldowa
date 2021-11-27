@@ -5,20 +5,22 @@ from datetime import datetime, timedelta
 import time
 
 
+credentials = pika.PlainCredentials('sarna', 'sarna')
+connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
+channel = connection.channel()
+channel.queue_declare(queue='basicpred_queue', durable=True)
 
 def request_prediction(symbol):
-    credentials = pika.PlainCredentials('sarna', 'sarna')
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
-    channel = connection.channel()
-    channel.queue_declare(queue='basicpred_queue', durable=True)
+    
     channel.basic_publish(
         exchange='',
         routing_key='basicpred_queue',
         body=symbol,
         properties=pika.BasicProperties(
             delivery_mode=2,
+            expiration='600000',
         ))
-    connection.close()
+    
     print(f'Pred: {symbol}')
 
 
@@ -56,14 +58,17 @@ def run():
             sql = "SELECT * FROM action WHERE company_id = %s order by timestamp DESC;"
             cur.execute(sql, (company_id,))
             action = cur.fetchone()
-            action_dt = timestamp_to_dt(action[2])
+            if action:
+                action_dt = timestamp_to_dt(action[2])
+            else:
+                action_dt = datetime.now() - timedelta(days=600)
             current_company = yf.Ticker(c_symbol)
             values = current_company.history(start=action_dt+timedelta(hours=1), interval='1d')
             time_data = []
             for i in values.index:
                 dt = i.to_pydatetime()
                 time_data.append((int(1000 * values.at[i,"Open"]), int(datetime.timestamp(dt))))
-            if time_data[0][0]==action[1]:
+            if action and time_data[0][0]==action[1]:
                 time_data=time_data[1:]
             
             if len(time_data) > 0:
@@ -74,7 +79,7 @@ def run():
             if len(time_data) > 0 or not future:
                 request_prediction(c_symbol)
                 pred_reqs += 1
-                
+
             sql = "INSERT INTO action(value, timestamp, company_id) VALUES(%s,%s,%s)"
             for r in time_data:
                 cur.execute(sql, (r[0], r[1], company_id))

@@ -62,6 +62,11 @@ def fit_and_blowup_data(raw_data, scaler):
 def refit_and_flatten_data(raw_data, pred, scaler, steps):
     pred = scaler.inverse_transform(torch.reshape(pred.detach(), (-1, 1)).numpy())
     pred = list(pred.flatten()[-(steps+1):])
+    for e, p in enumerate(pred[:-1]):
+        if pred[e+1] / p > 1.2:
+            pred[e+1] = p * 1.2
+        elif pred[e+1] / p < 0.8:
+            pred[e+1] = p * 0.8
     avg = sum(raw_data[-steps:]) / steps
     noise = [x - avg for x in raw_data[-steps - 20:-20]]
     noise.reverse()
@@ -106,6 +111,10 @@ def callback(ch, method, properties, body):
     cur.execute(newest_action_sql, (company_id,))
     #action_id, action_value, action_timestamp, action_company_id = cur.fetchmany(100)
     actions = cur.fetchmany(1000)
+    if len(actions) == 0:
+        print(f"\t[x] No data!")
+        ch.basic_ack(delivery_tag=method.delivery_tag)
+        return
     print(f"\t[x] Predicting {steps} steps...")
     values = [x[1]/ 1000.0 for x in actions]
     values.reverse()
@@ -136,7 +145,7 @@ except:
 
 channel = connection.channel()
 channel.queue_declare(queue='basicpred_queue', durable=True)
-channel.basic_qos(prefetch_count=1)
+channel.basic_qos(prefetch_count=10)
 channel.basic_consume(queue='basicpred_queue', on_message_callback=callback)
 print('[X]   Connected to all. Starting consuming queue...')
 channel.start_consuming()
