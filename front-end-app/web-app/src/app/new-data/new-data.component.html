@@ -2,9 +2,7 @@
   <mat-stepper linear #stepper>
     <mat-step [stepControl]="firstFormGroup" [editable]="true">
       <form [formGroup]="firstFormGroup">
-        <ng-template matStepLabel
-          >Wprowadź plik z danymi oraz nazwę</ng-template
-        >
+        <ng-template matStepLabel>Wprowadź plik z danymi</ng-template>
         <div>
           <input
             #csvInput
