@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, request, redirect, render_template
 from flask_restful import Api, Resource, reqparse
 import sqlalchemy
 #from flask_cors import CORS #comment this on deployment
@@ -27,6 +27,19 @@ api = Api(app)
 @app.route("/", defaults={'path':''})
 def serve(path):
     return send_from_directory(app.static_folder,'index.html')
+
+
+@app.route("/flask/upload-data", methods=["GET", "POST"])
+def upload_image():
+
+    if request.method == "POST":
+        print(request.data)
+        if request.files:
+            print(request.files)
+            return {'files':'yes'}
+
+
+    return {'recieved':'yes'}
 
 from data_request_handler import ActionDataRequestHandler, AddCompanyRequestHandler, CandidateRequestHandler, CompanyDataRequestHandler, PopularCompanyRequestHandler, PredictRequestHandler
 api.add_resource(ActionDataRequestHandler, '/flask/data/<company>')
