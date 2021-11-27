@@ -19,20 +19,9 @@ def request_prediction(symbol):
             delivery_mode=2,
         ))
     connection.close()
+    print(f'Pred: {symbol}')
 
-def request_data(message):
-    credentials = pika.PlainCredentials('sarna', 'sarna')
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
-    channel = connection.channel()
-    channel.queue_declare(queue='task_queue', durable=True)
-    channel.basic_publish(
-        exchange='',
-        routing_key='task_queue',
-        body=message,
-        properties=pika.BasicProperties(
-            delivery_mode=2,
-        ))
-    connection.close()
+
 
 
 try:
@@ -62,6 +51,7 @@ def run():
         companies = cur.fetchall()
         print(f"\t  [x] Got {len(companies)} companies...")
         updates = 0
+        pred_reqs = 0
         for company_id,c_name,c_symbol,c_stock in companies:
             sql = "SELECT * FROM action WHERE company_id = %s order by timestamp DESC;"
             cur.execute(sql, (company_id,))
@@ -75,16 +65,25 @@ def run():
                 time_data.append((int(1000 * values.at[i,"Open"]), int(datetime.timestamp(dt))))
             if time_data[0][0]==action[1]:
                 time_data=time_data[1:]
-            sql = "INSERT INTO action(value, timestamp, company_id) VALUES(%s,%s,%s)"
+            
             if len(time_data) > 0:
                 updates += 1
+            sql = "SELECT * FROM future WHERE company_id = %s order by timestamp DESC;"
+            cur.execute(sql, (company_id,))
+            future = cur.fetchone()
+            if len(time_data) > 0 or not future:
+                request_prediction(c_symbol)
+                pred_reqs += 1
+                
+            sql = "INSERT INTO action(value, timestamp, company_id) VALUES(%s,%s,%s)"
             for r in time_data:
                 cur.execute(sql, (r[0], r[1], company_id))
                 db_conn.commit()
-            time.sleep(1)
+            
         end=datetime.now()
         delta=end-start
         print(f"\t  [x] Updated {updates} companies.")
+        print(f"\t  [x] Requesting {pred_reqs} predictions.")
         print(f"\t  [x] Waiting {step_seconds-delta.seconds} seconds...")
         time.sleep(max(0,step_seconds-delta.seconds))
 print('[X]   Connected to all.')
