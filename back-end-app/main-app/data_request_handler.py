@@ -133,11 +133,15 @@ class CompanyDataRequestHandler(Resource):
     for company in Company.query.all():
       company:Company
       actions = Action.query.filter(Action.company_id==company.id).order_by(desc(Action.timestamp))[:2]
-      groing_by = (actions[0].value - actions[1].value) / 1000.0
-      if groing_by > 0:
-        is_groing = 'yes'
+      if len(actions) > 0:
+        groing_by = (actions[0].value - actions[1].value) / 1000.0
+        if groing_by > 0:
+          is_groing = 'yes'
+        else:
+          is_groing = 'no'
       else:
-        is_groing = 'no'
+        is_groing = 'unknown'
+        groing_by = 0
       data.append({'name':company.company_name, 'symbol':company.symbol, 'growing':is_groing, 'growing_by':groing_by, 'value':actions[1].value / 1000.0})
     return data
         
