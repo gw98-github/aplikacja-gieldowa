@@ -26,7 +26,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { FormsModule } from '@angular/forms';
+import { MatStepperModule } from '@angular/material/stepper';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AddNewCompanyComponent } from './add-new-company/add-new-company.component';
 
 const routes: Routes = [
@@ -60,8 +61,10 @@ const routes: Routes = [
     MatProgressBarModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    MatStepperModule,
     MatDialogModule,
     FormsModule,
+    ReactiveFormsModule,
     NgxChartsModule,
     HttpClientModule,
     MatTableModule,
