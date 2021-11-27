@@ -64,9 +64,9 @@ def drop_table(db_conn, cur, table_name):
     return rows_deleted
     
 
-def clear_db(db):
-    print('Removing Action, Company, Stock, Apisource tables...')
+def clear_db(db, c_all, c_pred, c_comp, c_act):
 
+    print('Connecting...')
     db_conn = psycopg2.connect(database='sarna', user='postgres', host='0.0.0.0', password='sarna')
     cur = db_conn.cursor()
     #cur.execute(f"DROP TABLE IF EXISTS action CASCADE") 
@@ -74,22 +74,28 @@ def clear_db(db):
     #cur.execute(f"DROP TABLE IF EXISTS stock CASCADE") 
     #cur.execute(f"DROP TABLE IF EXISTS api_source CASCADE") 
     print(f"Deleting candidates {drop_table(db_conn, cur, 'candidate')}")
-    print(f"Deleting predictions {drop_table(db_conn, cur, 'prediction')}")
-    print(f"Deleting futures {drop_table(db_conn, cur, 'future')}")
-    print(f"Deleting actions {drop_table(db_conn, cur, 'action')}")
-    print(f"Deleting company {drop_table(db_conn, cur, 'company')}")
-    print(f"Deleting stock {drop_table(db_conn, cur, 'stock')}")
-    print(f"Deleting apisource {drop_table(db_conn, cur, 'api_source')}")
+    if c_pred or c_comp:
+        print(f"Deleting predictions {drop_table(db_conn, cur, 'prediction')}")
+        print(f"Deleting futures {drop_table(db_conn, cur, 'future')}")
+    if c_act:
+        print(f"Deleting actions {drop_table(db_conn, cur, 'action')}")
+    if c_comp:
+        print(f"Deleting company {drop_table(db_conn, cur, 'company')}")
+    if c_all:
+        print(f"Deleting stock {drop_table(db_conn, cur, 'stock')}")
+        print(f"Deleting apisource {drop_table(db_conn, cur, 'api_source')}")
     
 
 
     print('Creating Action, Company, Stock, Apisource tables...')
     db.create_all()
-    print('Creating apisource...')
-    api_id = create_apisource(db, 'Yahoo')
-    print('Creating stock...')
-    stock_id = create_stock(db, 'SomeStock', api_id)
-    db.session.commit()
+    if c_all:
+        print('Creating apisource...')
+        api_id = create_apisource(db, 'Yahoo')
+        db.session.commit()
+        print('Creating stock...')
+        stock_id = create_stock(db, 'SomeStock', api_id)
+        db.session.commit()
     print('Filling candidates...')
     with open('stock_combined.txt', 'r', encoding='utf8') as fi:
         sql = "INSERT INTO candidate(symbol, name) VALUES(%s,%s)"
@@ -98,8 +104,30 @@ def clear_db(db):
             cur.execute(sql, (symbol, name, ))
             db_conn.commit()
             pass
-    print('Filling companies with real data...')
-    for symbol, name in tqdm(records[:32]):
-        request_data(symbol)
+    if c_comp:
+        print('Filling companies with real data...')
+        for symbol, name in tqdm(records[:32]):
+            request_data(symbol)
 
-clear_db(db)
+
+
+import argparse
+
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--comp', action='store_true',
+                    help='clears actions and companies')
+parser.add_argument('--act', action='store_true',
+                    help='clears only actions')
+parser.add_argument('--pred', action='store_true',
+                    help='clears predictions')
+parser.add_argument('--all', action='store_true',
+                    help='clears all')
+
+args = parser.parse_args()
+
+c_all = args.all
+c_pred = args.pred or c_all
+c_comp = args.comp or c_all
+c_act = args.act or c_comp
+
+clear_db(db, c_all, c_pred, c_comp, c_act)
