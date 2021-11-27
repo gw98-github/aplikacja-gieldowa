@@ -1,6 +1,9 @@
 # aplikacja-gieldowa
+
 1)Front(angular) ...front-end-app/web-app$ ng serve
+
 2)back (flask) ...back-end-app/main-app$ flask run
+
 3)reszta backendu ...back-end-app$ sudo docker-compose up
 
 Do debugu można sobie wykomentowac workera z docker-compose i odpalać go z ręki komendą:
