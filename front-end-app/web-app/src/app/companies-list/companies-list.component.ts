@@ -87,6 +87,10 @@ export class CompaniesListComponent implements OnInit {
   getData() {
     this.stockDataService.getCompaniesList().subscribe((response) => {
       this.companies = response.companies;
+      console.log(this.companies);
+      this.companies = this.companies.filter((s: any) => {
+        return s.growing != 'unknown';
+      });
       this.dataSource.data = this.companies;
     });
   }
