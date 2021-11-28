@@ -47,6 +47,44 @@ class Company (db.Model):
         self.symbol = symbol
         self.stock_id=stock_id
 
+class UserRequest (db.Model):
+    __tablename__ = 'user_request'
+    id = db.Column(db.Integer, primary_key=True)
+    request_id = db.Column(db.BigInteger, unique=True, nullable=False)
+    state = db.Column(db.Integer)
+    progress = db.Column(db.Integer)
+    def __init__(self, request_id, state, progress) -> None:
+        super().__init__()
+        self.request_id = request_id
+        self.state = state
+        self.progress = progress
+
+class UserDataPoint (db.Model):
+    __tablename__ = 'user_data_point'
+    id = db.Column(db.Integer, primary_key=True)
+    request_id = db.Column(db.BigInteger, db.ForeignKey('user_request.id'))
+    value = db.Column(db.Integer, unique=False, nullable=False)
+    timestamp = db.Column(db.Integer, unique=False, nullable=False) 
+    def __init__(self, request_id, value, timestamp) -> None:
+        super().__init__()
+        self.request_id = request_id
+        self.value = value
+        self.timestamp = timestamp
+
+class UserDataPrediction (db.Model):
+    __tablename__ = 'user_pred'
+    id = db.Column(db.Integer, primary_key=True)
+    request_id = db.Column(db.BigInteger, db.ForeignKey('user_request.id'))
+    value = db.Column(db.Integer, unique=False, nullable=False)
+    timestamp = db.Column(db.Integer, unique=False, nullable=False) 
+
+    def __init__(self, request_id, value, timestamp) -> None:
+        super().__init__()
+        self.request_id = request_id
+        self.value = value
+        self.timestamp=timestamp
+
+
 class Future (db.Model):
     __tablename__ = 'future'
     id = db.Column(db.Integer, primary_key=True)

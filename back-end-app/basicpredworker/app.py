@@ -3,6 +3,7 @@ import psycopg2
 from datetime import datetime, timedelta
 import random
 import numpy
+from sqlalchemy.sql.expression import true
 import torch
 from sklearn.preprocessing import MinMaxScaler
 from model import LSTM
@@ -67,9 +68,9 @@ def refit_and_flatten_data(raw_data, pred, scaler, steps):
     pred = scaler.inverse_transform(torch.reshape(pred.detach(), (-1, 1)).numpy())
     pred = list(pred.flatten()[-(steps+1):])
     for e, p in enumerate(pred[:-1]):
-        if pred[e+1] / p > 1.2:
+        if p != 0 and pred[e+1] / p > 1.2:
             pred[e+1] = p * 1.2
-        elif pred[e+1] / p < 0.8:
+        elif p != 0 and  pred[e+1] / p < 0.8:
             pred[e+1] = p * 0.8
     avg = sum(raw_data[-steps:]) / steps
     noise = [x - avg for x in raw_data[-steps - 20:-20]]
@@ -81,60 +82,100 @@ def refit_and_flatten_data(raw_data, pred, scaler, steps):
 
 
 def callback(ch, method, properties, body):
-    symbol = body.decode()
-    print(f"\t[x] Received request for {symbol}")
-    find_company = "SELECT * FROM company WHERE symbol = %s;"
-    cur.execute(find_company, (symbol,))
-    company = cur.fetchone()
-    if not company:
-        print(f"\t[x] No such company: {symbol}")
-        ch.basic_ack(delivery_tag=method.delivery_tag)
-        return
-    company_id, company_name, symbol, stock_id = company
-    print(f"\t[x] Found company: {symbol} ({company_name})")
-    get_future = "SELECT * FROM future WHERE company_id = %s"
-    cur.execute(get_future, (company_id,))
-    future = cur.fetchone()
-    now = int(datetime.timestamp(datetime.now()))
-    if not future:
-        print(f"\t[x] No future found, creating one...")
-        add_future = """INSERT INTO future(company_id,timestamp)
-             VALUES(%s,%s) RETURNING id;"""
-        cur.execute(add_future, (company_id,now))
-        future_id = cur.fetchone()[0]
-        db_conn.commit()
+    symbol = body.decode().split(';')
+    user_request = False
+    if symbol[0] == 'ur':
+        user_request = True
+        symbol = int(symbol[1])
     else:
-        print(f"\t[x] Found future, cleaning...")
-        future_id = future[0]
-        delete_preds = "DELETE FROM prediction WHERE company_id = %s;"
-        cur.execute(delete_preds, (future_id,))
-        db_conn.commit()
-    print(f"\t[x] Clean future")
+        symbol = symbol[0]
     steps = 20
-    newest_action_sql = "SELECT * FROM action WHERE company_id = %s ORDER BY timestamp DESC"
-    cur.execute(newest_action_sql, (company_id,))
-    #action_id, action_value, action_timestamp, action_company_id = cur.fetchmany(100)
-    actions = cur.fetchmany(1000)
-    if len(actions) == 0:
-        print(f"\t[x] No data!")
-        ch.basic_ack(delivery_tag=method.delivery_tag)
-        return
+    print(f"\t[x] Received request for {symbol}")
+    if user_request:
+        find_request = "SELECT * FROM user_request WHERE request_id = %s;"
+        cur.execute(find_request, (symbol,))
+        request = cur.fetchone()
+        if not request:
+            print(f"\t[x] No such request: {symbol}")
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+            return
+        update_request = """UPDATE user_request SET state=(%s) WHERE id = %s RETURNING id;"""
+        cur.execute(update_request, (1, request[0]))
+        print('Inserted')
+        request_db_id = cur.fetchone()[0]
+        db_conn.commit()
+        newest_action_sql = "SELECT * FROM user_data_point WHERE request_id = %s ORDER BY timestamp DESC"
+        cur.execute(newest_action_sql, (request_db_id,))
+        #action_id, action_value, action_timestamp, action_company_id = cur.fetchmany(100)
+        actions = cur.fetchmany(1000)
+        
+        values = [x[2] / 1000.0 for x in actions]
+        values.reverse()
+
+    else:
+        find_company = "SELECT * FROM company WHERE symbol = %s;"
+        cur.execute(find_company, (symbol,))
+        company = cur.fetchone()
+        if not company:
+            print(f"\t[x] No such company: {symbol}")
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+            return
+        company_id, company_name, symbol, stock_id = company
+        print(f"\t[x] Found company: {symbol} ({company_name})")
+        get_future = "SELECT * FROM future WHERE company_id = %s"
+        cur.execute(get_future, (company_id,))
+        future = cur.fetchone()
+        now = int(datetime.timestamp(datetime.now()))
+        if not future:
+            print(f"\t[x] No future found, creating one...")
+            add_future = """INSERT INTO future(company_id,timestamp)
+                VALUES(%s,%s) RETURNING id;"""
+            cur.execute(add_future, (company_id,now))
+            future_id = cur.fetchone()[0]
+            db_conn.commit()
+        else:
+            print(f"\t[x] Found future, cleaning...")
+            future_id = future[0]
+            delete_preds = "DELETE FROM prediction WHERE company_id = %s;"
+            cur.execute(delete_preds, (future_id,))
+            db_conn.commit()
+        print(f"\t[x] Clean future")
+        
+        newest_action_sql = "SELECT * FROM action WHERE company_id = %s ORDER BY timestamp DESC"
+        cur.execute(newest_action_sql, (company_id,))
+        #action_id, action_value, action_timestamp, action_company_id = cur.fetchmany(100)
+        actions = cur.fetchmany(1000)
+        if len(actions) == 0:
+            print(f"\t[x] No data!")
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+            return
+        
+        values = [x[1]/ 1000.0 for x in actions]
+        values.reverse()
     print(f"\t[x] Predicting {steps} steps...")
-    values = [x[1]/ 1000.0 for x in actions]
-    values.reverse()
-    #pred = run_model_spoofed(steps=steps, end=now_dt, step_time=timedelta(days=1), as_tuples=True, beg_val=action_value / 1000.0)
+    
     pred = run_model(values, steps=20)
     
-    sql = "INSERT INTO prediction(value, timestamp, company_id) VALUES(%s,%s,%s)"
-    print(f"\t[x] Inserting into future...")
-    #cur.execute(sql, (action_value, action_timestamp, future_id, ))
-    #db_conn.commit()
-    start = datetime.fromtimestamp(actions[0][2])
-
-    for r in pred:
-        cur.execute(sql, (int(r * 1000), int(datetime.timestamp(start)), future_id))
+    if user_request:
+        sql = "INSERT INTO user_pred(request_id, value, timestamp) VALUES(%s,%s,%s)"
+        print(f"\t[x] Inserting into user future...")
+        for e, r in enumerate(pred):
+            cur.execute(sql, (request_db_id, int(r * 1000), e, ))
+            db_conn.commit()
+        update_request = """UPDATE user_request SET state=(%s) WHERE id = %s;"""
+        cur.execute(update_request, (2, request_db_id))
         db_conn.commit()
-        start += timedelta(days=1)
+        print('UPDATE')
+    else:
+        sql = "INSERT INTO prediction(value, timestamp, company_id) VALUES(%s,%s,%s)"
+        print(f"\t[x] Inserting into future...")
+
+        start = datetime.fromtimestamp(actions[0][2])
+
+        for r in pred:
+            cur.execute(sql, (int(r * 1000), int(datetime.timestamp(start)), future_id))
+            db_conn.commit()
+            start += timedelta(days=1)
     print(f"\t[x] Future done!")
 
     ch.basic_ack(delivery_tag=method.delivery_tag)

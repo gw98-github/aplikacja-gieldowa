@@ -64,7 +64,7 @@ def drop_table(db_conn, cur, table_name):
     return rows_deleted
     
 
-def clear_db(db, c_all, c_pred, c_comp, c_act):
+def clear_db(db, c_all, c_pred, c_comp, c_act, c_usr):
 
     print('Connecting...')
     db_conn = psycopg2.connect(database='sarna', user='postgres', host='0.0.0.0', password='sarna')
@@ -74,6 +74,9 @@ def clear_db(db, c_all, c_pred, c_comp, c_act):
     #cur.execute(f"DROP TABLE IF EXISTS stock CASCADE") 
     #cur.execute(f"DROP TABLE IF EXISTS api_source CASCADE") 
     print(f"Deleting candidates {drop_table(db_conn, cur, 'candidate')}")
+    print(f"Deleting user_data_point {drop_table(db_conn, cur, 'user_data_point')}")
+    print(f"Deleting user_pred {drop_table(db_conn, cur, 'user_pred')}")
+    print(f"Deleting user_request {drop_table(db_conn, cur, 'user_request')}")
     if c_pred or c_comp:
         print(f"Deleting predictions {drop_table(db_conn, cur, 'prediction')}")
         print(f"Deleting futures {drop_table(db_conn, cur, 'future')}")
@@ -122,6 +125,8 @@ parser.add_argument('--pred', action='store_true',
                     help='clears predictions')
 parser.add_argument('--all', action='store_true',
                     help='clears all')
+parser.add_argument('--usr', action='store_true',
+                    help='clears user pred')
 
 args = parser.parse_args()
 
@@ -129,5 +134,6 @@ c_all = args.all
 c_pred = args.pred or c_all
 c_comp = args.comp or c_all
 c_act = args.act or c_comp
+c_usr = args.usr or c_all
 
-clear_db(db, c_all, c_pred, c_comp, c_act)
+clear_db(db, c_all, c_pred, c_comp, c_act, c_usr)

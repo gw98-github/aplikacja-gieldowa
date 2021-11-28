@@ -4,8 +4,9 @@ from datetime import datetime, timedelta
 import random
 import pika
 from sqlalchemy import func, desc, asc
+from werkzeug.wrappers import Request
 from app import db
-from models import Candidate, Company, Action, Future, Prediction, Stock, Apisource
+from models import Candidate, Company, Action, Future, Prediction, Stock, Apisource, UserDataPoint, UserDataPrediction, UserRequest
 
 from misc import dane_z_nikad
 
@@ -29,6 +30,7 @@ class PredictRequestHandler(Resource):
         ))
     connection.close()
     return {'msg': 'adding'}
+
 
 
 class AddCompanyRequestHandler(Resource):
@@ -55,6 +57,39 @@ class AddCompanyRequestHandler(Resource):
         ))
     connection.close()
     return {'msg': 'adding'}
+
+class OwnPredictionRequestHandler(Resource):
+
+  def get(self, request_id=None):
+    if not request_id:
+        return {'msg': 'Provide request id!'}
+    try:
+      request_id = int(request_id)
+    except:
+      return {'msg': 'Provide propper request id!'}
+    results = UserRequest.query.filter(UserRequest.request_id == request_id).all()
+    if len(results) == 0:
+      return {'msg':'No request!'}
+    request:UserRequest
+    request = results[0]
+    
+    if request.state == 0:
+      return {'msg': 'fine', 'state':'waiting in queue'}
+    if request.state == 1:
+      return {'msg': 'fine', 'state':'processing', 'progress':request.progress}
+
+    actions = UserDataPoint.query.filter(UserDataPoint.request_id==request.id).order_by(desc(UserDataPoint.timestamp)).limit(100)[::-1]
+    predict = UserDataPrediction.query.filter(UserDataPrediction.request_id==request.id).order_by(desc(UserDataPrediction.timestamp))[::-1]
+
+    actions = [(e, round(float(action.value / 1000.0), 2)) for e, action in enumerate(actions)]
+    alen = len(actions)
+    predict = [(alen + e, round(float(pred.value / 1000.0), 2)) for e, pred in enumerate(predict)]
+
+    data = {'request': request.request_id}
+    data['data'] = {t[0]:t[1] for t in actions}
+    data['predict'] = {t[0]:t[1] for t in predict}
+
+    return data
 
 
 class PopularCompanyRequestHandler(Resource):
