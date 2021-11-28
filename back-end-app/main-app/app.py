@@ -29,7 +29,7 @@ def serve(path):
     return send_from_directory(app.static_folder,'index.html')
 
 
-@app.route("/flask/upload-data", methods=["GET", "POST"])
+@app.route("/flask/upload_data", methods=["GET", "POST"])
 def upload_image():
 
     if request.method == "POST":
@@ -41,16 +41,16 @@ def upload_image():
 
     return {'recieved':'yes'}
 
-from data_request_handler import ActionDataRequestHandler, AddCompanyRequestHandler, CandidateRequestHandler, CompanyDataRequestHandler, PopularCompanyRequestHandler, PredictRequestHandler
+from data_request_handler import ActionDataRequestHandler, AddCompanyRequestHandler, CandidateRequestHandler, CompanyDataRequestHandler, CurrentModelRequestHandler, PopularCompanyRequestHandler, PredictRequestHandler
 api.add_resource(ActionDataRequestHandler, '/flask/data/<company>')
 api.add_resource(AddCompanyRequestHandler, '/flask/add_company/<symbol>')
 api.add_resource(PredictRequestHandler, '/flask/predict/<symbol>')
 api.add_resource(CompanyDataRequestHandler, '/flask/list/companies')
 api.add_resource(PopularCompanyRequestHandler, '/flask/popular')
 api.add_resource(CandidateRequestHandler, '/flask/candidates')
-
-
+api.add_resource(CurrentModelRequestHandler, '/flask/predictors')
 
 if __name__ == '__main__':
+
     db.create_all()
     app.run()

@@ -8,13 +8,13 @@ import time
 credentials = pika.PlainCredentials('sarna', 'sarna')
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
 channel = connection.channel()
-channel.queue_declare(queue='basicpred_queue', durable=True)
+channel.queue_declare(queue='pred_queue_0', durable=True)
 
 def request_prediction(symbol):
     
     channel.basic_publish(
         exchange='',
-        routing_key='basicpred_queue',
+        routing_key='pred_queue_0',
         body=symbol,
         properties=pika.BasicProperties(
             delivery_mode=2,

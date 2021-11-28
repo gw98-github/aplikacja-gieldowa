@@ -19,10 +19,10 @@ class PredictRequestHandler(Resource):
     credentials = pika.PlainCredentials('sarna', 'sarna')
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
     channel = connection.channel()
-    channel.queue_declare(queue='basicpred_queue', durable=True)
+    channel.queue_declare(queue='pred_queue_0', durable=True)
     channel.basic_publish(
         exchange='',
-        routing_key='basicpred_queue',
+        routing_key='pred_queue_0',
         body=symbol,
         properties=pika.BasicProperties(
             delivery_mode=2,  # make message persistent
@@ -117,6 +117,13 @@ class CandidateRequestHandler(Resource):
     companies = set(c.symbol for c in Company.query.all())
     candidates = list(filter(lambda x: x[1] not in companies, [(c.name, c.symbol) for c in  Candidate.query.order_by(asc(Candidate.name)).all()]))
     return {'candidates':candidates}
+  
+class CurrentModelRequestHandler(Resource):
+
+  def get(self,):
+    return [{'name':'Model prosty', 'id':0, 'desc':'Szybki model przystosowany do predykcji na krótkich okresach czas.'},
+            {'name':'Model zaawansowany', 'id':1, 'desc':'Rozbudowany model posiadający wyższą skuteczność dla większych okresów czasu.'},
+            {'name':'Model niewielkich różnic', 'id':2, 'desc':'Prosty model przystosowany do danych o niższej dynamice. '}]
   
 
 class CompanyDataRequestHandler(Resource):

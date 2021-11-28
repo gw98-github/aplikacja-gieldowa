@@ -13,9 +13,13 @@ except:
 cur = db_conn.cursor()
 
 
-model = LSTM()
-model.load_state_dict(torch.load('./base_model.model'))
+model:LSTM
 
+
+def load_config(c_path):
+    with open('models.conf', 'r', encoding='utf8') as fi:
+        models_dict = {x[0]:{'path':x[1], 'hidden_dim': int(x[2]), 'num_layers':int(x[3])} for x in [y.strip().split(';') for y in fi]}
+    return models_dict
 
 def run_model_spoofed(steps:int=100, end:datetime=None, step_time:timedelta=None, beg_val:int=400, 
     stringify=False, fluctuation=100, as_tuples:bool=False):
@@ -137,15 +141,32 @@ def callback(ch, method, properties, body):
 
 
 
+
+
 credentials = pika.PlainCredentials('sarna', 'sarna')
 try:
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
 except:
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='0.0.0.0', credentials=credentials))
 
+import argparse
+parser = argparse.ArgumentParser(description='')
+parser.add_argument('model', help='model number')
+
+args = parser.parse_args()
+
+
+config = load_config('models.conf')
+model_config = config[args.model]
+
+print(f"[X]   Loading model {args.model} from {model_config['path']}...")
+model = LSTM(hidden_dim=model_config['hidden_dim'], num_layers=model_config['num_layers'])
+
+model.load_state_dict(torch.load(model_config['path']))
+print(f"[X]   Model loaded.")
 channel = connection.channel()
-channel.queue_declare(queue='basicpred_queue', durable=True)
+channel.queue_declare(queue=f'pred_queue_{args.model}', durable=True)
 channel.basic_qos(prefetch_count=10)
-channel.basic_consume(queue='basicpred_queue', on_message_callback=callback)
-print('[X]   Connected to all. Starting consuming queue...')
+channel.basic_consume(queue=f'pred_queue_{args.model}', on_message_callback=callback)
+print('[X]   Connected to all. Consuming queue...')
 channel.start_consuming()

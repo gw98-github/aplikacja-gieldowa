@@ -1,5 +1,6 @@
 version: '3.5'
 services:
+# BASE SERVICES
   database:
     container_name: postgress
     image: postgres
@@ -12,7 +13,6 @@ services:
       - "postgres"
       - "-c"
       - "listen_addresses=*"
-
   rabbitmq3:
         container_name: "rabbitmq"
         image: rabbitmq:3.8-management-alpine
@@ -20,10 +20,9 @@ services:
             - RABBITMQ_DEFAULT_USER=sarna
             - RABBITMQ_DEFAULT_PASS=sarna
         ports:
-            # AMQP protocol port
             - '5672:5672'
-            # HTTP management UI
             - '15672:15672'
+# SYSTEM WORKERS
   stockapiworker:
     image: stockapiworker
     volumes:
@@ -34,7 +33,10 @@ services:
       - database
       - rabbitmq3
     restart: always
-  basicpredworker:
+# add updateworker
+
+# PREDICTION WORKERS
+  predworker_m0:
     image: basicpredworker
     volumes:
       - basicpredworker:/app
@@ -44,6 +46,44 @@ services:
       - database
       - rabbitmq3
     restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    command:
+      - "app.py"
+      - "0"
+  predworker_m1:
+    image: basicpredworker
+    volumes:
+      - basicpredworker:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - database
+      - rabbitmq3
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    command:
+      - "app.py"
+      - "1"
+  predworker_m2:
+    image: basicpredworker
+    volumes:
+      - basicpredworker:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - database
+      - rabbitmq3
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    command:
+      - "app.py"
+      - "2"
 volumes:
   db-data:
   basicpredworker:
