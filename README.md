@@ -61,3 +61,15 @@ CREATE DATABASE sarna;
 
 a potem wpisanie rzeczy do bazy używając:
 2)back (flask) ...back-end-app/main-app$ python3 create_db.py
+
+
+Wysłanie pliku do backendu:
+curl -X POST http://127.0.0.1:5000/flask/upload_data -F "datafile=@/sciezka/do/pliku" -F "modelid=0"
+
+
+np z flderu ...back-end-app/main-app$ 
+curl -X POST http://127.0.0.1:5000/flask/upload_data -F "datafile=@./test.txt" -F "modelid=0"
+
+plik test.txt zawiera poprawne dane
+
+
