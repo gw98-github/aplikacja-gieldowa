@@ -33,10 +33,9 @@ from models import UserRequest, UserDataPoint
 def upload_image():
 
     if request.method == "POST":
-        if not ('modelid' in request.values and 'datafile' in request.files):
-            return {'message':'Invalid data! Provide model id in value "modelid" and the file in "datafile".'}
-        model_id = request.values['modelid']
-        file = request.files['datafile']
+        if not ('modelId' in request.values and 'dataFile' in request.files):
+            return {'message':'Invalid data! Provide model id in value "modelId" and the file in "dataFile".'}
+        file = request.files['dataFile']
         lines = file.read().decode().split('\n')
         if ';' in lines[0]:
             separator = ';'
