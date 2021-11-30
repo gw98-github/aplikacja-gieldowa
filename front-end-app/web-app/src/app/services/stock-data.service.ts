@@ -2,6 +2,7 @@ import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { HistoricalData } from '../model';
+import { delay } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -55,13 +56,21 @@ export class StockDataService {
     });
   }
 
+  getPrediction(id: number): Observable<any> {
+    return this.http.get(this.baseURL + '/own_prediction/' + id, {
+      headers: { header: 'Access-Control-Allow-Origin' },
+    });
+  }
+
   postFileWithData(file: any, id: number) {
     let formData = new FormData();
 
     formData.append('dataFile', file, file.name);
     formData.append('modelId', id.toString());
-    return this.http.post(this.baseURL + '/upload_data', formData, {
-      headers: { header: 'Access-Control-Allow-Origin' },
-    });
+    return this.http
+      .post(this.baseURL + '/upload_data', formData, {
+        headers: { header: 'Access-Control-Allow-Origin' },
+      })
+      .pipe(delay(10000));
   }
 }

@@ -65,10 +65,32 @@
     </mat-step>
     <mat-step>
       <ng-template matStepLabel>Wynik predykcji</ng-template>
-      <p>You are now done.</p>
+
+      <div *ngIf="predictionID == 0"><mat-spinner></mat-spinner></div>
+      <div *ngIf="newData">
+        <h1 style="color: black; text-align: center">Wyniki predykcji</h1>
+        <app-chart-viewer
+          [viewSize]="[500, 250]"
+          [newData]="newData"
+        ></app-chart-viewer>
+      </div>
+
       <div>
-        <button mat-button matStepperPrevious>Back</button>
-        <button mat-button (click)="stepper.reset()">Reset</button>
+        <button
+          mat-flat-button
+          color="primary"
+          style="margin-right: 10px"
+          matStepperPrevious
+        >
+          Powrót
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="stepper.reset(); fileName = ''"
+        >
+          Reset
+        </button>
       </div>
     </mat-step>
   </mat-stepper>

@@ -21,6 +21,9 @@ export class ChartViewerComponent implements OnInit {
   @Input()
   viewSize: [number, number] = [800, 360];
 
+  @Input()
+  newData?: any = [];
+
   // options
   showXAxis = true;
   showYAxis = true;
@@ -37,25 +40,54 @@ export class ChartViewerComponent implements OnInit {
 
   constructor(private stockDataService: StockDataService) {
     this.multi = [];
+
+    // if (this.newData != []) {
+
+    // this.data = this.createList(this.newData);
+    // this.multi = [
+    //   {
+    //     name: 'Wartość',
+    //     series: this.data[0],
+    //   },
+    //   {
+    //     name: 'Predykcja',
+    //     series: this.data[1],
+    //   },
+    // ];
+    // }
   }
   ngOnInit(): void {
-    this.stockDataService
-      .getCompanyData(this.companyName)
-      .subscribe((response) => {
-        //next() callback
-        this.data = this.createList(response);
+    if (this.newData != []) {
+      this.data = this.createList(this.newData);
+      this.multi = [
+        {
+          name: 'Wartość',
+          series: this.data[0],
+        },
+        {
+          name: 'Predykcja',
+          series: this.data[1],
+        },
+      ];
+    } else {
+      this.stockDataService
+        .getCompanyData(this.companyName)
+        .subscribe((response) => {
+          //next() callback
+          this.data = this.createList(response);
 
-        this.multi = [
-          {
-            name: 'Wartość',
-            series: this.data[0],
-          },
-          {
-            name: 'Predykcja',
-            series: this.data[1],
-          },
-        ];
-      });
+          this.multi = [
+            {
+              name: 'Wartość',
+              series: this.data[0],
+            },
+            {
+              name: 'Predykcja',
+              series: this.data[1],
+            },
+          ];
+        });
+    }
   }
 
   public onSelect(event: any): void {}

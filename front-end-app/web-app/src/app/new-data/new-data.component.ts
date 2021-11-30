@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StockDataService } from '../services/stock-data.service';
+import { delay } from 'rxjs/operators';
 
 export interface Model {
   value: number;
@@ -18,6 +19,8 @@ export class NewDataComponent implements OnInit {
   file?: File;
   models: Array<Model> = [];
   selectedModelID: number = 0;
+  predictionID: number = 0;
+  newData: any;
 
   constructor(
     private stockDataService: StockDataService,
@@ -31,7 +34,6 @@ export class NewDataComponent implements OnInit {
 
     this.stockDataService.getModels().subscribe((response) => {
       this.models = this.reformatModels(response);
-      console.log(this.models);
     });
   }
 
@@ -47,13 +49,21 @@ export class NewDataComponent implements OnInit {
   }
 
   sendDataToBackend() {
-    console.log(this.file, this.selectedModelID);
-
     this.stockDataService
       .postFileWithData(this.file, this.selectedModelID)
-      .subscribe((response) => {
-        console.log(response);
+      .subscribe((response: any) => {
+        this.predictionID = response.request_id;
+
+        this.stockDataService
+          .getPrediction(this.predictionID)
+          .subscribe((response) => {
+            this.newData = response;
+          });
       });
+  }
+
+  delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   reformatModels(models: Array<any>) {
