@@ -56,12 +56,12 @@ export class StockDataService {
   }
 
   postFileWithData(file: any, id: number) {
-    return this.http.post(
-      this.baseURL + '/upload_data',
-      { dataFile: file, modelId: id },
-      {
-        headers: { header: 'Access-Control-Allow-Origin' },
-      }
-    );
+    let formData = new FormData();
+
+    formData.append('dataFile', file, file.name);
+    formData.append('modelId', id.toString());
+    return this.http.post(this.baseURL + '/upload_data', formData, {
+      headers: { header: 'Access-Control-Allow-Origin' },
+    });
   }
 }
