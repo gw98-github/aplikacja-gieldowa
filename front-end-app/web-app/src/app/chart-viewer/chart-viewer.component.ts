@@ -22,7 +22,7 @@ export class ChartViewerComponent implements OnInit {
   viewSize: [number, number] = [800, 360];
 
   @Input()
-  newData?: any = [];
+  newData?: any = false;
 
   // options
   showXAxis = true;
@@ -57,7 +57,8 @@ export class ChartViewerComponent implements OnInit {
     // }
   }
   ngOnInit(): void {
-    if (this.newData != []) {
+    if (this.newData != false) {
+      console.log(this.newData);
       this.data = this.createList(this.newData);
       this.multi = [
         {
