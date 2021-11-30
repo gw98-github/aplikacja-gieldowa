@@ -15,7 +15,7 @@ export class ChartViewerComponent implements OnInit {
   @Input()
   companyName: string = '';
 
-  multi: any[];
+  multi: any[] = [];
   data: Array<Array<{ name: string; value: number }>> = [];
 
   @Input()

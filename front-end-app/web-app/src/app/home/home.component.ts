@@ -7,7 +7,7 @@ import { StockDataService } from '../services/stock-data.service';
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements OnInit {
-  popularList: any;
+  popularList: any = undefined;
   innerWidth: number = 1200;
   chartWidth: number = 500;
   chartHeigh: number = 250;
