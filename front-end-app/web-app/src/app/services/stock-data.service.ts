@@ -43,15 +43,25 @@ export class StockDataService {
     });
   }
 
+  getModels(): Observable<any> {
+    return this.http.get(this.baseURL + '/predictors', {
+      headers: { header: 'Access-Control-Allow-Origin' },
+    });
+  }
+
   addNewCompany(name: string): Observable<any> {
     return this.http.get(this.baseURL + '/add_company/' + name, {
       headers: { header: 'Access-Control-Allow-Origin' },
     });
   }
 
-  postFileWithData(file: any) {
-    return this.http.post(this.baseURL + '/upload-data', file, {
-      headers: { header: 'Access-Control-Allow-Origin' },
-    });
+  postFileWithData(file: any, id: number) {
+    return this.http.post(
+      this.baseURL + '/upload-data',
+      { dataFile: file, modelId: id },
+      {
+        headers: { header: 'Access-Control-Allow-Origin' },
+      }
+    );
   }
 }

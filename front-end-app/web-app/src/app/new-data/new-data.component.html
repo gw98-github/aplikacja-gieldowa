@@ -10,7 +10,7 @@
             type="file"
             onclick="this.value=null"
             (change)="csvInputChange($event)"
-            accept=".csv,.txt,.json,.xml"
+            accept=".csv,.txt"
             formControlName="firstCtrl"
             required
           />
@@ -32,17 +32,16 @@
         </div>
       </form>
     </mat-step>
-    <mat-step [stepControl]="secondFormGroup" [editable]="true">
-      <form [formGroup]="secondFormGroup">
+    <mat-step [editable]="true">
+      <form>
         <ng-template matStepLabel>Wybierz model</ng-template>
         <mat-form-field appearance="fill">
-          <mat-label>Address</mat-label>
-          <input
-            matInput
-            formControlName="secondCtrl"
-            placeholder="Ex. 1 Main St, New York, NY"
-            required
-          />
+          <mat-label>Wybierz model</mat-label>
+          <mat-select [(ngModel)]="selectedModelID" name="models">
+            <mat-option *ngFor="let model of models" [value]="model.value">
+              {{ model.viewValue }}
+            </mat-option>
+          </mat-select>
         </mat-form-field>
         <div>
           <button
@@ -53,7 +52,12 @@
           >
             Wróć
           </button>
-          <button mat-flat-button color="primary" matStepperNext>
+          <button
+            mat-flat-button
+            color="primary"
+            matStepperNext
+            (click)="sendDataToBackend()"
+          >
             Przejdź dalej
           </button>
         </div>
