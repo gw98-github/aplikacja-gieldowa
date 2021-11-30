@@ -57,7 +57,7 @@ export class StockDataService {
 
   postFileWithData(file: any, id: number) {
     return this.http.post(
-      this.baseURL + '/upload-data',
+      this.baseURL + '/upload_data',
       { dataFile: file, modelId: id },
       {
         headers: { header: 'Access-Control-Allow-Origin' },
