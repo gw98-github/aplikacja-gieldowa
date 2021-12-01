@@ -73,6 +73,14 @@
           [viewSize]="[500, 250]"
           [newData]="newData"
         ></app-chart-viewer>
+        <button
+          mat-flat-button
+          color="primary"
+          style="margin-bottom: 20px"
+          (click)="downloadFile()"
+        >
+          Pobierz plik z danymi
+        </button>
       </div>
 
       <div>
