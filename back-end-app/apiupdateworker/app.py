@@ -3,7 +3,7 @@ import yfinance as yf
 import psycopg2
 from datetime import datetime, timedelta
 import time
-
+import math
 
 credentials = pika.PlainCredentials('sarna', 'sarna')
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
@@ -20,8 +20,6 @@ def request_prediction(symbol):
             delivery_mode=2,
             expiration='600000',
         ))
-    
-    print(f'Pred: {symbol}')
 
 
 
@@ -54,6 +52,7 @@ def run():
         print(f"\t  [x] Got {len(companies)} companies...")
         updates = 0
         pred_reqs = 0
+        action_upd = 0
         for company_id,c_name,c_symbol,c_stock in companies:
             sql = "SELECT * FROM action WHERE company_id = %s order by timestamp DESC;"
             cur.execute(sql, (company_id,))
@@ -67,12 +66,17 @@ def run():
             time_data = []
             for i in values.index:
                 dt = i.to_pydatetime()
-                time_data.append((int(1000 * values.at[i,"Open"]), int(datetime.timestamp(dt))))
+                val = values.at[i,"Open"]
+                val = int(1000 * val) if val and not math.isnan(val) else 0
+                time_data.append((val, int(datetime.timestamp(dt))))
             if action and time_data[0][0]==action[1]:
                 time_data=time_data[1:]
-            
+
+            action_upd += len(time_data)
             if len(time_data) > 0:
+                print (c_symbol)
                 updates += 1
+
             sql = "SELECT * FROM future WHERE company_id = %s order by timestamp DESC;"
             cur.execute(sql, (company_id,))
             future = cur.fetchone()
@@ -88,7 +92,9 @@ def run():
         end=datetime.now()
         delta=end-start
         print(f"\t  [x] Updated {updates} companies.")
+        print(f"\t  [x] Fetched {action_upd} datatpoints.")
         print(f"\t  [x] Requesting {pred_reqs} predictions.")
+        print(f"\t  [x] Update elapsed {delta.seconds} seconds.")
         print(f"\t  [x] Waiting {step_seconds-delta.seconds} seconds...")
         time.sleep(max(0,step_seconds-delta.seconds))
 print('[X]   Connected to all.')
