@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StockDataService } from '../services/stock-data.service';
 import { delay } from 'rxjs/operators';
+import { interval } from 'rxjs';
 
 export interface Model {
   value: number;
@@ -20,7 +21,7 @@ export class NewDataComponent implements OnInit {
   models: Array<Model> = [];
   selectedModelID: number = 0;
   predictionID: number = 0;
-  newData: any;
+  newData: any = undefined;
 
   constructor(
     private stockDataService: StockDataService,
@@ -51,15 +52,36 @@ export class NewDataComponent implements OnInit {
   sendDataToBackend() {
     this.stockDataService
       .postFileWithData(this.file, this.selectedModelID)
-      .subscribe((response: any) => {
+      .subscribe(async (response: any) => {
         this.predictionID = response.request_id;
-
-        this.stockDataService
-          .getPrediction(this.predictionID)
-          .subscribe((response) => {
-            this.newData = response;
-          });
+        const source = interval(2000);
+        const sub = source.subscribe((val) => {
+          this.stockDataService
+            .getPrediction(this.predictionID)
+            .pipe(delay(1000))
+            .subscribe((response) => {
+              if (!(response.state && response.state == 'processing')) {
+                this.newData = response;
+                sub.unsubscribe();
+              }
+            });
+        });
       });
+  }
+
+  setNewData() {
+    const sub = this.stockDataService
+      .getPrediction(this.predictionID)
+      .pipe(delay(1000))
+      .subscribe((response) => {
+        if (!(response.state && response.state == 'processing')) {
+          this.newData = response;
+        }
+      });
+    sub.unsubscribe();
+    if (this.newData == undefined) {
+      this.setNewData();
+    }
   }
 
   delay(ms: number) {

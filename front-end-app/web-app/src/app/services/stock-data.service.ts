@@ -67,10 +67,8 @@ export class StockDataService {
 
     formData.append('dataFile', file, file.name);
     formData.append('modelId', id.toString());
-    return this.http
-      .post(this.baseURL + '/upload_data', formData, {
-        headers: { header: 'Access-Control-Allow-Origin' },
-      })
-      .pipe(delay(10000));
+    return this.http.post(this.baseURL + '/upload_data', formData, {
+      headers: { header: 'Access-Control-Allow-Origin' },
+    });
   }
 }
