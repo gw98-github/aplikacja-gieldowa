@@ -4,7 +4,6 @@ import sqlalchemy
 #from flask_cors import CORS #comment this on deployment
 
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_cors import CORS, cross_origin
 import config
 import time
@@ -30,7 +29,7 @@ def serve(path):
 
 from models import UserRequest, UserDataPoint
 @app.route("/flask/upload_data", methods=["GET", "POST"])
-def upload_image():
+def upload_datafile():
 
     if request.method == "POST":
         if not ('modelId' in request.values and 'dataFile' in request.files):
@@ -78,12 +77,12 @@ def upload_image():
                 delivery_mode=2,  # make message persistent
             ))
         connection.close()
-        
-
 
     return {'request_id':f'{request_id}'}
 
 from data_request_handler import ActionDataRequestHandler, AddCompanyRequestHandler, CandidateRequestHandler, CompanyDataRequestHandler, CurrentModelRequestHandler, PopularCompanyRequestHandler, PredictRequestHandler, OwnPredictionRequestHandler
+
+
 api.add_resource(ActionDataRequestHandler, '/flask/data/<company>')
 api.add_resource(AddCompanyRequestHandler, '/flask/add_company/<symbol>')
 api.add_resource(PredictRequestHandler, '/flask/predict/<symbol>')
