@@ -66,6 +66,21 @@ export class NewDataComponent implements OnInit {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  downloadFile() {
+    const blob = new Blob(
+      [
+        'data:\t',
+        JSON.stringify(this.newData.data),
+        '\n',
+        'predict:\t',
+        JSON.stringify(this.newData.predict),
+      ],
+      { type: 'text/csv' }
+    );
+    const url = window.URL.createObjectURL(blob);
+    window.open(url);
+  }
+
   reformatModels(models: Array<any>) {
     let returnArray: Array<Model> = [];
     models.forEach((m: any) => {
