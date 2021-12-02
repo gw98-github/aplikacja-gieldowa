@@ -28,60 +28,10 @@ api = Api(app)
 def serve(path):
     return send_from_directory(app.static_folder,'index.html')
 
-from models import UserRequest, UserDataPoint
+from file_upload_handler import upload_datafile
 @app.route("/flask/upload_data", methods=["GET", "POST"])
-def upload_image():
-
-    if request.method == "POST":
-        if not ('modelId' in request.values and 'dataFile' in request.files):
-            return {'message':'Invalid data! Provide model id in value "modelId" and the file in "dataFile".'}
-        file = request.files['dataFile']
-        lines = file.read().decode().split('\n')
-        if ';' in lines[0]:
-            separator = ';'
-        else:
-            separator = ','
-        if len(lines) == 1:
-            try:
-                data = [float(x) for x in lines.split(separator)]
-            except:
-                return {'msg':'parsing error'}
-        else:
-            data = [l.split(separator)[-1] for l in lines]
-            try:
-                x = float(data[0])
-            except:
-                data = data[1:]
-            try:
-                data = [float(d) for d in data]
-            except:
-                return {'msg':'parsing error'}
-            
-        request_id = int(time.time() * 1000)
-        ur = UserRequest(request_id, 0, 0)
-        db.session.add(ur)
-        db.session.commit()
-        
-        for e, d in enumerate(data):
-            db.session.add(UserDataPoint(ur.id, int(d * 1000), e))
-        db.session.commit()
-
-        credentials = pika.PlainCredentials('sarna', 'sarna')
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
-        channel = connection.channel()
-        channel.queue_declare(queue='pred_queue_0', durable=True)
-        channel.basic_publish(
-            exchange='',
-            routing_key='pred_queue_0',
-            body=f'ur;{request_id}',
-            properties=pika.BasicProperties(
-                delivery_mode=2,  # make message persistent
-            ))
-        connection.close()
-        
-
-
-    return {'request_id':f'{request_id}'}
+def handle_upload():
+    return upload_datafile(request)
 
 from data_request_handler import ActionDataRequestHandler, AddCompanyRequestHandler, CandidateRequestHandler, CompanyDataRequestHandler, CurrentModelRequestHandler, PopularCompanyRequestHandler, PredictRequestHandler, OwnPredictionRequestHandler
 api.add_resource(ActionDataRequestHandler, '/flask/data/<company>')

@@ -106,7 +106,6 @@ def callback(ch, method, properties, body):
         db_conn.commit()
         newest_action_sql = "SELECT * FROM user_data_point WHERE request_id = %s ORDER BY timestamp DESC"
         cur.execute(newest_action_sql, (request_db_id,))
-        #action_id, action_value, action_timestamp, action_company_id = cur.fetchmany(100)
         actions = cur.fetchmany(1000)
         
         values = [x[2] / 1000.0 for x in actions]
@@ -165,7 +164,6 @@ def callback(ch, method, properties, body):
         update_request = """UPDATE user_request SET state=(%s) WHERE id = %s;"""
         cur.execute(update_request, (2, request_db_id))
         db_conn.commit()
-        print('UPDATE')
     else:
         sql = "INSERT INTO prediction(value, timestamp, company_id) VALUES(%s,%s,%s)"
         print(f"\t[x] Inserting into future...")
@@ -206,8 +204,8 @@ model = LSTM(hidden_dim=model_config['hidden_dim'], num_layers=model_config['num
 model.load_state_dict(torch.load(model_config['path']))
 print(f"[X]   Model loaded.")
 channel = connection.channel()
-channel.queue_declare(queue=f'pred_queue_{args.model}', durable=True)
+channel.queue_declare(queue=f'pred_queue_0', durable=True)
 channel.basic_qos(prefetch_count=10)
-channel.basic_consume(queue=f'pred_queue_{args.model}', on_message_callback=callback)
+channel.basic_consume(queue=f'pred_queue_0', on_message_callback=callback)
 print('[X]   Connected to all. Consuming queue...')
 channel.start_consuming()
