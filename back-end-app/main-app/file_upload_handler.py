@@ -9,7 +9,8 @@ def check_request_validity(request):
 
 def try_parse_data(request):
     file = request.files['dataFile']
-    lines = file.read().decode().split('\n')
+    lines = [l.strip() for l in file.read().decode().split('\n')]
+    lines = [l for l in lines if len(l) > 0]
     if ';' in lines[0]:
         separator = ';'
     else:

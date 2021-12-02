@@ -83,10 +83,10 @@ class OwnPredictionRequestHandler(Resource):
 
     actions = [(e, round(float(action.value / 1000.0), 2)) for e, action in enumerate(actions)]
     alen = len(actions)
-    predict = [(alen + e, round(float(pred.value / 1000.0), 2)) for e, pred in enumerate(predict)]
+    predict = [(alen + e - 1, round(float(pred.value / 1000.0), 2)) for e, pred in enumerate(predict)]
 
     data = {'request': request.request_id}
-    data['data'] = {t[0]:t[1] for t in actions}
+    data['data'] = {t[0]:t[1] for t in actions[-80:]}
     data['predict'] = {t[0]:t[1] for t in predict}
 
     return data
