@@ -103,37 +103,40 @@ def clear_db(db, c_all, c_pred, c_comp, c_act, c_usr):
     with open('stock_combined.txt', 'r', encoding='utf8') as fi:
         sql = "INSERT INTO candidate(symbol, name) VALUES(%s,%s)"
         records = [x.strip().split(';') for x in fi]
-        for symbol, name in tqdm(records[32:1032]):
+        for symbol, name in tqdm(records[37:1037]):
+            cur.execute(sql, (symbol, name, ))
+            db_conn.commit()
+            pass
+        for symbol, name in tqdm(records[:5]):
             cur.execute(sql, (symbol, name, ))
             db_conn.commit()
             pass
     if c_comp:
         print('Filling companies with real data...')
-        for symbol, name in tqdm(records[:32]):
+        for symbol, name in tqdm(records[5:37]):
             request_data(symbol)
 
 
 
 import argparse
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--comp', action='store_true',
+                        help='clears actions and companies')
+    parser.add_argument('--act', action='store_true',
+                        help='clears only actions')
+    parser.add_argument('--pred', action='store_true',
+                        help='clears predictions')
+    parser.add_argument('--all', action='store_true',
+                        help='clears all')
+    parser.add_argument('--usr', action='store_true',
+                        help='clears user pred')
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--comp', action='store_true',
-                    help='clears actions and companies')
-parser.add_argument('--act', action='store_true',
-                    help='clears only actions')
-parser.add_argument('--pred', action='store_true',
-                    help='clears predictions')
-parser.add_argument('--all', action='store_true',
-                    help='clears all')
-parser.add_argument('--usr', action='store_true',
-                    help='clears user pred')
+    args = parser.parse_args()
 
-args = parser.parse_args()
-
-c_all = args.all
-c_pred = args.pred or c_all
-c_comp = args.comp or c_all
-c_act = args.act or c_comp
-c_usr = args.usr or c_all
-
-clear_db(db, c_all, c_pred, c_comp, c_act, c_usr)
+    c_all = args.all
+    c_pred = args.pred or c_all
+    c_comp = args.comp or c_all
+    c_act = args.act or c_comp
+    c_usr = args.usr or c_all
+    clear_db(db, c_all, c_pred, c_comp, c_act, c_usr)
