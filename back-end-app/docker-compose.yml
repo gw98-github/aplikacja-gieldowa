@@ -14,14 +14,24 @@ services:
       - "-c"
       - "listen_addresses=*"
   rabbitmq3:
-        container_name: "rabbitmq"
-        image: rabbitmq:3.8-management-alpine
-        environment:
-            - RABBITMQ_DEFAULT_USER=sarna
-            - RABBITMQ_DEFAULT_PASS=sarna
-        ports:
-            - '5672:5672'
-            - '15672:15672'
+    container_name: "rabbitmq"
+    image: rabbitmq:3.8-management-alpine
+    environment:
+      - RABBITMQ_DEFAULT_USER=sarna
+      - RABBITMQ_DEFAULT_PASS=sarna
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+  servicedispatcher:
+    image: servicedispatcher
+    ports:
+      - '5000:5000'
+    depends_on:
+      - database
+      - rabbitmq3
+    restart: always
+    volumes:
+      - servicedispatcher:/app
 # SYSTEM WORKERS
   stockapiworker:
     image: stockapiworker
@@ -33,7 +43,6 @@ services:
       - database
       - rabbitmq3
     restart: always
-# add updateworker
 
 # PREDICTION WORKERS
   predworker_m0:
@@ -48,7 +57,7 @@ services:
     restart: always
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 2
     command:
       - "app.py"
       - "0"
@@ -88,3 +97,4 @@ volumes:
   db-data:
   basicpredworker:
   stockapiworker:
+  servicedispatcher:

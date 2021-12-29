@@ -4,8 +4,10 @@ from datetime import datetime, timedelta
 import random
 import pika
 from sqlalchemy import func, desc, asc
-from base_app import db
+from werkzeug.wrappers import Request
+from app import db
 from models import Candidate, Company, Action, Future, Prediction, Stock, Apisource, UserDataPoint, UserDataPrediction, UserRequest
+
 from misc import dane_z_nikad
 
 class PredictRequestHandler(Resource):
@@ -16,10 +18,7 @@ class PredictRequestHandler(Resource):
   def add_company(self, symbol):
   
     credentials = pika.PlainCredentials('sarna', 'sarna')
-    try:
-      connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
-    except:
-      connection = pika.BlockingConnection(pika.ConnectionParameters(host='0.0.0.0', credentials=credentials))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
     channel = connection.channel()
     channel.queue_declare(queue='pred_queue_0', durable=True)
     channel.basic_publish(
@@ -46,10 +45,7 @@ class AddCompanyRequestHandler(Resource):
       company = results[0]
       return {'msg': 'present', 'name': company.company_name}
     credentials = pika.PlainCredentials('sarna', 'sarna')
-    try:
-      connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
-    except:
-      connection = pika.BlockingConnection(pika.ConnectionParameters(host='0.0.0.0', credentials=credentials))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
     channel = connection.channel()
     channel.queue_declare(queue='task_queue', durable=True)
     channel.basic_publish(
@@ -84,37 +80,17 @@ class OwnPredictionRequestHandler(Resource):
 
     actions = UserDataPoint.query.filter(UserDataPoint.request_id==request.id).order_by(desc(UserDataPoint.timestamp)).limit(100)[::-1]
     predict = UserDataPrediction.query.filter(UserDataPrediction.request_id==request.id).order_by(desc(UserDataPrediction.timestamp))[::-1]
-    
+
     actions = [(e, round(float(action.value / 1000.0), 2)) for e, action in enumerate(actions)]
     alen = len(actions)
     predict = [(alen + e - 1, round(float(pred.value / 1000.0), 2)) for e, pred in enumerate(predict)]
-    
+
     data = {'request': request.request_id}
     data['data'] = {t[0]:t[1] for t in actions[-80:]}
     data['predict'] = {t[0]:t[1] for t in predict}
 
     return data
 
-def request_data(symbol):
-  credentials = pika.PlainCredentials('sarna', 'sarna')
-  try:
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
-  except:
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='0.0.0.0', credentials=credentials))
-  channel = connection.channel()
-  channel.queue_declare(queue='task_queue', durable=True)
-  channel.basic_publish(
-      exchange='',
-      routing_key='task_queue',
-      body=symbol,
-      properties=pika.BasicProperties(
-          delivery_mode=2,  # make message persistent
-      ))
-  connection.close()
-
-def repair_empty_db():
-  from create_db import clear_db
-  clear_db(db, True, True, True, True, True)
 
 class PopularCompanyRequestHandler(Resource):
 
@@ -123,15 +99,9 @@ class PopularCompanyRequestHandler(Resource):
 
   def add_company(self, symbol):
     companies: List[Company]
-    companies = Company.query.limit(4)  
-    try:
-      x = {'popular': [[x.symbol, x.company_name] for x in companies]}
-    except:
-      print('ERROR! Empty db!')
-      db.session.commit()  
-      repair_empty_db()
-      return None
-    return x
+    companies = Company.query.limit(4)
+    
+    return {'popular': [[x.symbol, x.company_name] for x in companies]}
 
 
 class ActionDataRequestHandler(Resource):

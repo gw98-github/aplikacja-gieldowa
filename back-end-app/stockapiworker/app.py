@@ -21,6 +21,15 @@ def get_company_data(symbol):
         time_data.append((int(1000 * values.at[i,"Open"]), int(datetime.timestamp(dt))))
     return {'symbol':symbol, 'name':name, 'records':time_data}
 
+def request_prediction(symbol):
+    channel.basic_publish(
+        exchange='',
+        routing_key='pred_queue_0',
+        body=symbol,
+        properties=pika.BasicProperties(
+            delivery_mode=2,
+            expiration='600000',
+        ))
 
 
 def write_in_database(symbol,company_name,time_data):
@@ -35,6 +44,7 @@ def write_in_database(symbol,company_name,time_data):
     for r in time_data:
         cur.execute(sql, (r[0], r[1], company_id))
         db_conn.commit()
+    request_prediction(symbol)
     return
 
 def callback(ch, method, properties, body):
@@ -67,14 +77,22 @@ def callback(ch, method, properties, body):
 
 credentials = pika.PlainCredentials('sarna', 'sarna')
 try:
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
+    try:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
+    except:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='0.0.0.0', credentials=credentials))
+    failed = False
 except:
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='0.0.0.0', credentials=credentials))
-
-
-channel = connection.channel()
-channel.queue_declare(queue='task_queue', durable=True)
-channel.basic_qos(prefetch_count=1)
-channel.basic_consume(queue='task_queue', on_message_callback=callback)
-print('[X]   Connected to all. Starting consuming queue...')
-channel.start_consuming()
+    failed = True
+if failed:
+    import time
+    print(f"[X]   Failed to connect, trying again in 10 seconds.")
+    time.sleep(10)
+else:
+    channel = connection.channel()
+    channel.queue_declare(queue='task_queue', durable=True)
+    channel.queue_declare(queue='pred_queue_0', durable=True)
+    channel.basic_qos(prefetch_count=1)
+    channel.basic_consume(queue='task_queue', on_message_callback=callback)
+    print('[X]   Connected to all. Starting consuming queue...')
+    channel.start_consuming()

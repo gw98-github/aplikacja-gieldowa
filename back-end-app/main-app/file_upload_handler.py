@@ -1,6 +1,6 @@
 import pika
 from models import UserRequest, UserDataPoint
-from app import db
+from base_app import db
 import time
 def check_request_validity(request):
     if not ('modelId' in request.values and 'dataFile' in request.files):
@@ -34,7 +34,10 @@ def try_parse_data(request):
 
 def send_pred_request(request_id):
     credentials = pika.PlainCredentials('sarna', 'sarna')
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
+    try:
+      connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
+    except:
+      connection = pika.BlockingConnection(pika.ConnectionParameters(host='0.0.0.0', credentials=credentials))
     channel = connection.channel()
     channel.queue_declare(queue='pred_queue_0', durable=True)
     channel.basic_publish(

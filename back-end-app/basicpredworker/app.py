@@ -3,7 +3,6 @@ import psycopg2
 from datetime import datetime, timedelta
 import random
 import numpy
-from sqlalchemy.sql.expression import true
 import torch
 from sklearn.preprocessing import MinMaxScaler
 from model import LSTM
@@ -15,6 +14,7 @@ cur = db_conn.cursor()
 
 
 model:LSTM
+
 
 
 def load_config(c_path):
@@ -41,6 +41,10 @@ def run_model_spoofed(steps:int=100, end:datetime=None, step_time:timedelta=None
     if as_tuples:
         return data
     return {t[0]: t[1] for t in data}
+
+def offset_data(data):
+    random.seed(data[0] + int(model_id))
+    return [d * (random.random() * 0.2 + 0.9) for d in data]
 
 def run_model(raw_data, steps=20):
     scaler = MinMaxScaler(feature_range=(-1, 1))
@@ -73,11 +77,12 @@ def refit_and_flatten_data(raw_data, pred, scaler, steps):
         elif p != 0 and  pred[e+1] / p < 0.8:
             pred[e+1] = p * 0.8
     avg = sum(raw_data[-steps:]) / steps
-    noise = [x - avg for x in raw_data[-steps - 20:-20]]
+    noise = offset_data([x - avg for x in raw_data[-steps - 20:-20]])
     noise.reverse()
     noise[0]=0
     noise[1]=0
-    pred = [x + y/2 for x, y in zip(pred, noise)]
+    multi = 0.25 if model_id == '2' else 0.5
+    pred = [x + y * multi for x, y in zip(pred, noise)]
     return pred
 
 
@@ -184,28 +189,36 @@ def callback(ch, method, properties, body):
 
 credentials = pika.PlainCredentials('sarna', 'sarna')
 try:
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
+    try:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
+    except:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='0.0.0.0', credentials=credentials))
+    failed = False
 except:
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='0.0.0.0', credentials=credentials))
+    failed = True
+if failed:
+    import time
+    print(f"[X]   Failed to connect, trying again in 10 seconds.")
+    time.sleep(10)
+else:
+    import argparse
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('model', help='model number')
 
-import argparse
-parser = argparse.ArgumentParser(description='')
-parser.add_argument('model', help='model number')
-
-args = parser.parse_args()
+    args = parser.parse_args()
 
 
-config = load_config('models.conf')
-model_config = config[args.model]
+    config = load_config('models.conf')
+    model_config = config[args.model]
+    model_id = args.model
+    print(f"[X]   Loading model {args.model} from {model_config['path']}...")
+    model = LSTM(hidden_dim=model_config['hidden_dim'], num_layers=model_config['num_layers'])
 
-print(f"[X]   Loading model {args.model} from {model_config['path']}...")
-model = LSTM(hidden_dim=model_config['hidden_dim'], num_layers=model_config['num_layers'])
-
-model.load_state_dict(torch.load(model_config['path']))
-print(f"[X]   Model loaded.")
-channel = connection.channel()
-channel.queue_declare(queue=f'pred_queue_0', durable=True)
-channel.basic_qos(prefetch_count=10)
-channel.basic_consume(queue=f'pred_queue_0', on_message_callback=callback)
-print('[X]   Connected to all. Consuming queue...')
-channel.start_consuming()
+    model.load_state_dict(torch.load(model_config['path']))
+    print(f"[X]   Model loaded.")
+    channel = connection.channel()
+    channel.queue_declare(queue=f'pred_queue_0', durable=True)
+    channel.basic_qos(prefetch_count=10)
+    channel.basic_consume(queue=f'pred_queue_0', on_message_callback=callback)
+    print('[X]   Connected to all. Consuming queue...')
+    channel.start_consuming()

@@ -6,9 +6,22 @@ import time
 import math
 
 credentials = pika.PlainCredentials('sarna', 'sarna')
-connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
-channel = connection.channel()
-channel.queue_declare(queue='pred_queue_0', durable=True)
+
+try:
+    try:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
+    except:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='0.0.0.0', credentials=credentials))
+    failed = False
+except:
+    failed = True
+if failed:
+    import time
+    print(f"[X]   Failed to connect, trying again in 10 seconds.")
+    time.sleep(10)
+else:
+    channel = connection.channel()
+    channel.queue_declare(queue='pred_queue_0', durable=True)
 
 def request_prediction(symbol):
     

@@ -1,7 +1,7 @@
 from datetime import timedelta
 import random
 from typing import List
-from app import db
+from base_app import db
 from models import Apisource, Stock, Company, Action
 from misc import dane_z_nikad
 import psycopg2
@@ -10,6 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.declarative import declarative_base
 import pika
+import time
 
 some_symbols = ["OEDV", "AAPL", "BAC", "AMZN", "T", "GOOG", "MO", "DAL", "AA", "AXP", "DD", "BABA", "ABT", "UA", "AMAT", "AMGN"]
 
@@ -23,7 +24,10 @@ DATABASE_URI = f'postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_por
 
 def request_data(message):
     credentials = pika.PlainCredentials('sarna', 'sarna')
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=credentials))
+    try:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', credentials=credentials))
+    except:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='0.0.0.0', credentials=credentials))
     channel = connection.channel()
     channel.queue_declare(queue='task_queue', durable=True)
     channel.basic_publish(
@@ -64,11 +68,25 @@ def drop_table(db_conn, cur, table_name):
     return rows_deleted
     
 
-def clear_db(db, c_all, c_pred, c_comp, c_act, c_usr):
+def clear_db(db, c_all, c_pred, c_comp, c_act, c_usr, c_check):
 
+    if c_check:
+        print(f'Waiting...')    
+        time.sleep(10)
     print('Connecting...')
-    db_conn = psycopg2.connect(database='sarna', user='postgres', host='0.0.0.0', password='sarna')
+    try:
+        db_conn = psycopg2.connect(database='sarna', user='postgres', host='postgress', password='sarna')
+    except:
+        db_conn = psycopg2.connect(database='sarna', user='postgres', host='0.0.0.0', password='sarna')
     cur = db_conn.cursor()
+    if c_check:
+        cur.execute("select exists(select * from information_schema.tables where table_name=%s)", ('company',))
+        if cur.fetchone()[0]:
+            print("DB EXISTS!")
+            return
+        print("DB DOES NOT EXIST!")
+
+
     #cur.execute(f"DROP TABLE IF EXISTS action CASCADE") 
     #cur.execute(f"DROP TABLE IF EXISTS company CASCADE") 
     #cur.execute(f"DROP TABLE IF EXISTS stock CASCADE") 
@@ -91,7 +109,10 @@ def clear_db(db, c_all, c_pred, c_comp, c_act, c_usr):
 
 
     print('Creating Action, Company, Stock, Apisource tables...')
+    db.session.commit()
     db.create_all()
+    db.session.commit()
+
     if c_all:
         print('Creating apisource...')
         api_id = create_apisource(db, 'Yahoo')
@@ -131,7 +152,8 @@ if __name__ == "__main__":
                         help='clears all')
     parser.add_argument('--usr', action='store_true',
                         help='clears user pred')
-
+    parser.add_argument('--check', action='store_true',
+                        help='check')
     args = parser.parse_args()
 
     c_all = args.all
@@ -139,4 +161,4 @@ if __name__ == "__main__":
     c_comp = args.comp or c_all
     c_act = args.act or c_comp
     c_usr = args.usr or c_all
-    clear_db(db, c_all, c_pred, c_comp, c_act, c_usr)
+    clear_db(db, c_all, c_pred, c_comp, c_act, c_usr, args.check)
