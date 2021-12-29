@@ -8,7 +8,7 @@ import { delay } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class StockDataService {
-  baseURL: string = 'http://localhost:5000/flask';
+  baseURL: string = 'http://0.0.0.0:5000';
 
   public historicalData: Subject<HistoricalData[]> = new Subject();
 
@@ -21,43 +21,43 @@ export class StockDataService {
   }
 
   getCompaniesList(): Observable<any> {
-    return this.http.get(this.baseURL + '/list/companies', {
+    return this.http.get(this.baseURL + '/company/list', {
       headers: { header: 'Access-Control-Allow-Origin' },
     });
   }
 
   getCompanyData(name: string): Observable<any> {
-    return this.http.get(this.baseURL + '/data/' + name, {
+    return this.http.get(this.baseURL + '/company/data/' + name, {
       headers: { header: 'Access-Control-Allow-Origin' },
     });
   }
 
   getPopularCompanies(): Observable<any> {
-    return this.http.get(this.baseURL + '/popular', {
+    return this.http.get(this.baseURL + '/company/popular', {
       headers: { header: 'Access-Control-Allow-Origin' },
     });
   }
 
   getCandidatesList(): Observable<any> {
-    return this.http.get(this.baseURL + '/candidates', {
+    return this.http.get(this.baseURL + '/company/candidates', {
       headers: { header: 'Access-Control-Allow-Origin' },
     });
   }
 
   getModels(): Observable<any> {
-    return this.http.get(this.baseURL + '/predictors', {
+    return this.http.get(this.baseURL + '/user_pred/predictors', {
       headers: { header: 'Access-Control-Allow-Origin' },
     });
   }
 
   addNewCompany(name: string): Observable<any> {
-    return this.http.get(this.baseURL + '/add_company/' + name, {
+    return this.http.get(this.baseURL + '/company/add/' + name, {
       headers: { header: 'Access-Control-Allow-Origin' },
     });
   }
 
   getPrediction(id: number): Observable<any> {
-    return this.http.get(this.baseURL + '/own_prediction/' + id, {
+    return this.http.get(this.baseURL + '/user_pred/own_prediction/' + id, {
       headers: { header: 'Access-Control-Allow-Origin' },
     });
   }
@@ -67,7 +67,7 @@ export class StockDataService {
 
     formData.append('dataFile', file, file.name);
     formData.append('modelId', id.toString());
-    return this.http.post(this.baseURL + '/upload_data', formData, {
+    return this.http.post(this.baseURL + '/upload/userdata', formData, {
       headers: { header: 'Access-Control-Allow-Origin' },
     });
   }
