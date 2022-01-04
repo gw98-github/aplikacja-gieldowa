@@ -8,7 +8,7 @@ import { delay } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class StockDataService {
-  baseURL: string = 'http://0.0.0.0:5000';
+  baseURL: string = 'http://localhost:5000';
 
   public historicalData: Subject<HistoricalData[]> = new Subject();
 
