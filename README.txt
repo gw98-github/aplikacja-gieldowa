@@ -52,3 +52,22 @@ python3 app.py
 
 łączenie z bazą danych:
 psql -h 0.0.0.0 -p 5432 -U postgres
+
+
+Nowa wersja
+
+Backend po dokeryzacji należy uruchomić w inny sposób
+
+Najlepiej przed próbą uruchomienia *wyczyścić* wszystko:
+sudo docker system prune --all --volumes -f
+
+Stworzyć potrzebne workery:
+sudo docker build ./basicpredworker/ -t basicpredworker:latest --no-cache
+sudo docker build ./stockapiworker/ -t stockapiworker:latest --no-cache
+sudo docker build ./main-app/ -t servicedispatcher:latest --no-cache
+
+*Postawić* backend:
+sudo docker-compose up
+
+Stworzyć bazę danych:
+http://0.0.0.0:5000/make_db/
