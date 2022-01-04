@@ -10,6 +10,6 @@ COPY . /app
 RUN pip3 install -r requirements.txt
 RUN ["chmod", "+x", "/app/start.sh"]
 
-ENTRYPOINT [ "sh" ]
+ENTRYPOINT [ "python3" ]
 
-CMD ["start.sh"]
+CMD ["/app/run.py"]
